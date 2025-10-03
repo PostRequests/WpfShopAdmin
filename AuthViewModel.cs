@@ -80,13 +80,6 @@ namespace WpfShop.ViewModels
                               MessageBox.Show("Добро пожаловать в панель администратора!", "Администратор",
                                             MessageBoxButton.OK, MessageBoxImage.Information);
                           }
-                          else
-                          {
-                              StatusMessage = "✅ Успешный вход! Добро пожаловать в систему";
-                              MessageBox.Show("Добро пожаловать в магазин!", "Успешный вход",
-                                            MessageBoxButton.OK, MessageBoxImage.Information);
-                          }
-
                           // Открываем каталог и закрываем текущее окно
                           OpenCatalogAndClose();
                       }

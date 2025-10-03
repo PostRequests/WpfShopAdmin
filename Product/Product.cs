@@ -1,17 +1,71 @@
-// [Паттерн: Модель предметной области / Entity]
-// — Простая структура данных без поведения.
-// — Используется в репозитории и сервисах как переносимый объект данных.
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+
 namespace ConsoleShop
 {
-    public class Product // объявляем класс: Product// простые свойства на чтение/писание
+    public class Product : INotifyPropertyChanged
     {
-        public int id { get; set; }
-        public string title { get; set; } = "";
-        public List<string> tags { get; set; } = new();
-        public string description { get; set; } = "";
-        public int stock { get; set; }
-        public decimal price { get; set; }
-        public List<string> categories { get; set; } = new();     // Список категорий товара
-        public List<string> imageUrls { get; set; } = new();      // Ссылки на изображения товара
+        private int _id;
+        private string _title = "";
+        private List<string> _tags = new();
+        private string _description = "";
+        private int _stock;
+        private decimal _price;
+        private List<string> _categories = new();
+        private List<string> _imageUrls = new();
+
+        public int id
+        {
+            get => _id;
+            set { _id = value; OnPropertyChanged(); }
+        }
+
+        public string title
+        {
+            get => _title;
+            set { _title = value; OnPropertyChanged(); }
+        }
+
+        public List<string> tags
+        {
+            get => _tags;
+            set { _tags = value; OnPropertyChanged(); }
+        }
+
+        public string description
+        {
+            get => _description;
+            set { _description = value; OnPropertyChanged(); }
+        }
+
+        public int stock
+        {
+            get => _stock;
+            set { _stock = value; OnPropertyChanged(); }
+        }
+
+        public decimal price
+        {
+            get => _price;
+            set { _price = value; OnPropertyChanged(); }
+        }
+
+        public List<string> categories
+        {
+            get => _categories;
+            set { _categories = value; OnPropertyChanged(); }
+        }
+
+        public List<string> imageUrls
+        {
+            get => _imageUrls;
+            set { _imageUrls = value; OnPropertyChanged(); }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

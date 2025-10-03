@@ -1,18 +1,20 @@
 ﻿<Window x:Class="WpfShop.CatalogViev"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Каталог запчастей ИЖ" 
-        Height="700" Width="1000"
+        Title="Каталог запчастей" 
+        WindowState="Maximized"
         WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
         <!-- Цветовая схема -->
         <Color x:Key="PrimaryOrange">#FF9800</Color>
+        <Color x:Key="DarkOrange">#F57C00</Color>
         <Color x:Key="LightOrange">#FFE0B2</Color>
         <Color x:Key="BackgroundColor">#FAFAFA</Color>
         <Color x:Key="BorderColor">#E0E0E0</Color>
 
         <SolidColorBrush x:Key="PrimaryOrangeBrush" Color="{StaticResource PrimaryOrange}"/>
+        <SolidColorBrush x:Key="DarkOrangeBrush" Color="{StaticResource DarkOrange}"/>
         <SolidColorBrush x:Key="LightOrangeBrush" Color="{StaticResource LightOrange}"/>
         <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
         <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
@@ -25,6 +27,30 @@
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="10,5"/>
             <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <!-- Стиль для оранжевых кнопок -->
+        <Style x:Key="OrangeButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource PrimaryOrangeBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource DarkOrangeBrush}"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="{StaticResource DarkOrangeBrush}"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" Value="{StaticResource LightOrangeBrush}"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="Opacity" Value="0.6"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
 
         <!-- Стиль для списка категорий -->
@@ -77,6 +103,16 @@
                            Foreground="Gray"/>
             </StackPanel>
         </DataTemplate>
+
+        <!-- Стиль для текстовых полей -->
+        <Style x:Key="EditTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
     </Window.Resources>
 
     <Grid Background="{StaticResource BackgroundBrush}">
@@ -138,93 +174,94 @@
 
             <!-- Центральная панель - Список товаров -->
             <Border Grid.Column="1" 
-        Background="White" 
-        BorderBrush="{StaticResource BorderBrush}" 
-        BorderThickness="1"
-        Margin="5,0,5,0">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-
-        <TextBlock Text="Товары" 
-                   FontSize="16" 
-                   FontWeight="Bold"
-                   Margin="10,10,10,5"
-                   Grid.Row="0"/>
-
-        <TextBlock Text="{Binding SelectedCategory, StringFormat='Категория: {0}'}"
-                   FontSize="12"
-                   Foreground="Gray"
-                   Margin="10,0,10,5"
-                   Grid.Row="1"/>
-
-        <!-- Строка поиска -->
-        <StackPanel Grid.Row="2" 
-                    Orientation="Horizontal" 
-                    Margin="10,5,10,10"
-                    VerticalAlignment="Center">
-            <TextBlock Text="Поиск:" 
-                       FontSize="12"
-                       Foreground="Gray"
-                       VerticalAlignment="Center"
-                       Margin="0,0,5,0"/>
-            
-            <TextBox x:Name="SearchTextBox"
-                     Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                     Width="150"
-                     Height="25"
-                     Padding="5,2"
-                     FontSize="12">
-                <TextBox.Style>
-                    <Style TargetType="TextBox">
-                        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
-                        <Setter Property="BorderThickness" Value="1"/>
-                        <Setter Property="Background" Value="White"/>
-                        <Style.Triggers>
-                            <Trigger Property="IsFocused" Value="True">
-                                <Setter Property="BorderBrush" Value="{StaticResource PrimaryOrangeBrush}"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBox.Style>
-            </TextBox>
-            
-            <!-- Кнопка очистки поиска -->
-            <Button Content="✕"
-                    Width="25"
-                    Height="25"
-                    Margin="5,0,0,0"
-                    Background="Transparent"
-                    BorderBrush="{StaticResource BorderBrush}"
+                    Background="White" 
+                    BorderBrush="{StaticResource BorderBrush}" 
                     BorderThickness="1"
-                    FontSize="10"
-                    Command="{Binding ClearSearchCommand}">
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding SearchQuery}" Value="">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-            </Button>
-        </StackPanel>
+                    Margin="5,0,5,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-        <!-- ListBox занимает все оставшееся пространство со скроллом -->
-        <ListBox ItemsSource="{Binding FilteredProducts}"
-                 SelectedItem="{Binding SelectedProduct}"
-                 ItemContainerStyle="{StaticResource ProductListBoxItemStyle}"
-                 ItemTemplate="{StaticResource ProductItemTemplate}"
-                 BorderThickness="0"
-                 Grid.Row="3"
-                 ScrollViewer.VerticalScrollBarVisibility="Auto"/>
-    </Grid>
-</Border>
+                    <TextBlock Text="Товары" 
+                               FontSize="16" 
+                               FontWeight="Bold"
+                               Margin="10,10,10,5"
+                               Grid.Row="0"/>
+
+                    <TextBlock Text="{Binding SelectedCategory, StringFormat='Категория: {0}'}"
+                               FontSize="12"
+                               Foreground="Gray"
+                               Margin="10,0,10,5"
+                               Grid.Row="1"/>
+
+                    <!-- Строка поиска -->
+                    <StackPanel Grid.Row="2" 
+                                Orientation="Horizontal" 
+                                Margin="10,5,10,10"
+                                VerticalAlignment="Center">
+                        <TextBlock Text="Поиск:" 
+                                   FontSize="12"
+                                   Foreground="Gray"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,5,0"/>
+
+                        <TextBox x:Name="SearchTextBox"
+                                 Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="150"
+                                 Height="25"
+                                 Padding="5,2"
+                                 FontSize="12">
+                            <TextBox.Style>
+                                <Style TargetType="TextBox">
+                                    <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+                                    <Setter Property="BorderThickness" Value="1"/>
+                                    <Setter Property="Background" Value="White"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsFocused" Value="True">
+                                            <Setter Property="BorderBrush" Value="{StaticResource PrimaryOrangeBrush}"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
+
+                        <!-- Кнопка очистки поиска -->
+                        <Button Content="✕"
+                                Width="25"
+                                Height="25"
+                                Margin="5,0,0,0"
+                                Background="Transparent"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1"
+                                FontSize="10"
+                                Command="{Binding ClearSearchCommand}">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SearchQuery}" Value="">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- ListBox занимает все оставшееся пространство со скроллом -->
+                    <ListBox ItemsSource="{Binding FilteredProducts}"
+                             SelectedItem="{Binding SelectedProduct}"
+                             ItemContainerStyle="{StaticResource ProductListBoxItemStyle}"
+                             ItemTemplate="{StaticResource ProductItemTemplate}"
+                             BorderThickness="0"
+                             Grid.Row="3"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                </Grid>
+            </Border>
+
             <!-- Правая панель - Детали товара -->
             <Border Grid.Column="2" 
                     Background="White" 
@@ -246,103 +283,117 @@
                         </Border>
 
                         <!-- Название -->
-                        <TextBlock Text="{Binding SelectedProduct.title}" 
-                                   FontSize="18" 
-                                   FontWeight="Bold"
-                                   TextWrapping="Wrap"
-                                   Margin="0,0,0,10"/>
+                        <TextBlock Text="Название:" 
+                                   FontWeight="SemiBold"
+                                   Foreground="Gray"
+                                   Margin="0,0,0,5"/>
+                        <TextBox Text="{Binding SelectedProduct.title, UpdateSourceTrigger=PropertyChanged}" 
+                                 Style="{StaticResource EditTextBoxStyle}"
+                                 FontSize="18" 
+                                 FontWeight="Bold"
+                                 TextWrapping="Wrap"
+                                 Margin="0,0,0,10"/>
 
                         <!-- Теги -->
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                            <TextBlock Text="Теги: " 
-                                       FontWeight="SemiBold"
-                                       Foreground="Gray"/>
-                            <ItemsControl ItemsSource="{Binding SelectedProduct.tags}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <WrapPanel/>
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Background="{StaticResource LightOrangeBrush}"
-                                                CornerRadius="10"
-                                                Margin="2,0,2,2"
-                                                Padding="6,2">
-                                            <TextBlock Text="{Binding .}" 
-                                                       FontSize="11"
-                                                       Foreground="#666"/>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
+                        <TextBlock Text="Теги:" 
+                                   FontWeight="SemiBold"
+                                   Foreground="Gray"
+                                   Margin="0,0,0,5"/>
+                        <TextBox Text="{Binding SelectedProductTags, UpdateSourceTrigger=PropertyChanged}" 
+                                 Style="{StaticResource EditTextBoxStyle}"
+                                 Margin="0,0,0,10"
+                                 ToolTip="Теги через запятую"/>
 
                         <!-- Описание -->
                         <TextBlock Text="Описание:" 
                                    FontWeight="SemiBold"
                                    Foreground="Gray"
                                    Margin="0,0,0,5"/>
-                        <TextBlock Text="{Binding SelectedProduct.description}" 
-                                   TextWrapping="Wrap"
-                                   Margin="0,0,0,15"
-                                   FontSize="13"/>
+                        <TextBox Text="{Binding SelectedProduct.description, UpdateSourceTrigger=PropertyChanged}" 
+                                 Style="{StaticResource EditTextBoxStyle}"
+                                 TextWrapping="Wrap"
+                                 Margin="0,0,0,15"
+                                 AcceptsReturn="True"
+                                 MinHeight="60"/>
 
-                        <!-- Наличие (простой текст) -->
-                        <TextBlock Text="{Binding SelectedProduct.stock, StringFormat='Наличие: {0} шт.'}" 
+                        <!-- Наличие -->
+                        <TextBlock Text="Количество на складе:" 
                                    FontWeight="SemiBold"
-                                   HorizontalAlignment="Center"
-                                   Margin="0,0,0,10">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding SelectedProduct.stock}" Value="0">
-                                            <Setter Property="Foreground" Value="Red"/>
-                                            <Setter Property="Text" Value="НЕТ В НАЛИЧИИ"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding SelectedProduct.stock}" Value="1">
-                                            <Setter Property="Foreground" Value="Orange"/>
-                                            <Setter Property="Text" Value="Мало (1 шт.)"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding SelectedProduct.stock}" Value="2">
-                                            <Setter Property="Foreground" Value="Orange"/>
-                                            <Setter Property="Text" Value="Мало (2 шт.)"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding SelectedProduct.stock}" Value="3">
-                                            <Setter Property="Foreground" Value="Orange"/>
-                                            <Setter Property="Text" Value="Мало (3 шт.)"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding SelectedProduct.stock}" Value="4">
-                                            <Setter Property="Foreground" Value="Orange"/>
-                                            <Setter Property="Text" Value="Мало (4 шт.)"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
+                                   Foreground="Gray"
+                                   Margin="0,0,0,5"/>
+                        <TextBox Text="{Binding SelectedProduct.stock, UpdateSourceTrigger=PropertyChanged}" 
+                                 Style="{StaticResource EditTextBoxStyle}"
+                                 FontWeight="SemiBold"
+                                 HorizontalAlignment="Left"
+                                 Margin="0,0,0,10"
+                                 Width="80"/>
 
                         <!-- Цена -->
-                        <TextBlock Text="{Binding SelectedProduct.price, StringFormat='Цена: {0} ₽'}" 
-                                   FontSize="20" 
-                                   FontWeight="Bold"
-                                   Foreground="{StaticResource PrimaryOrangeBrush}"
-                                   HorizontalAlignment="Center"
-                                   Margin="0,0,0,15"/>
+                        <TextBlock Text="Цена:" 
+                                   FontWeight="SemiBold"
+                                   Foreground="Gray"
+                                   Margin="0,0,0,5"/>
+                        <TextBox Text="{Binding SelectedProduct.price, UpdateSourceTrigger=PropertyChanged}" 
+                                 Style="{StaticResource EditTextBoxStyle}"
+                                 FontSize="20" 
+                                 FontWeight="Bold"
+                                 Foreground="{StaticResource PrimaryOrangeBrush}"
+                                 HorizontalAlignment="Left"
+                                 Margin="0,0,0,15"
+                                 Width="120"/>
 
                         <!-- Категории -->
                         <TextBlock Text="Категории:" 
                                    FontWeight="SemiBold"
                                    Foreground="Gray"
                                    Margin="0,0,0,5"/>
-                        <ItemsControl ItemsSource="{Binding SelectedProduct.categories}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding .}" 
-                                               FontSize="12"
-                                               Margin="0,1"/>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        <TextBox Text="{Binding SelectedProductCategories, UpdateSourceTrigger=PropertyChanged}" 
+                                 Style="{StaticResource EditTextBoxStyle}"
+                                 Margin="0,0,0,15"
+                                 AcceptsReturn="True"
+                                 MinHeight="40"
+                                 ToolTip="Категории через запятую"/>
+
+                        <!-- Кнопка сохранения -->
+                        <Button Content="Сохранить изменения" 
+                                Command="{Binding SaveProductCommand}"
+                                Background="{StaticResource PrimaryOrangeBrush}"
+                                Foreground="White"
+                                FontWeight="SemiBold"
+                                HorizontalAlignment="Stretch"
+                                Margin="0,10,0,0"
+                                Height="35"
+                                FontSize="14"
+                                BorderThickness="0"
+                                Cursor="Hand">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="{StaticResource PrimaryOrangeBrush}"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="{StaticResource DarkOrangeBrush}"/>
+                                        </Trigger>
+                                        <DataTrigger Binding="{Binding IsProductChanged}" Value="False">
+                                            <Setter Property="IsEnabled" Value="False"/>
+                                            <Setter Property="Opacity" Value="0.6"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding SelectedProduct}" Value="{x:Null}">
+                                            <Setter Property="IsEnabled" Value="False"/>
+                                            <Setter Property="Opacity" Value="0.6"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+
+                        <!-- Статус сохранения -->
+                        <TextBlock Text="{Binding SaveStatus}" 
+                                   FontSize="12"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,5,0,0"
+                                   Foreground="{Binding SaveStatusColor}"/>
                     </StackPanel>
                 </ScrollViewer>
             </Border>
