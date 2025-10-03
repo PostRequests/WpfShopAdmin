@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Windows.Data;
 
 namespace WpfShop.ViewModels
 {
@@ -11,15 +12,20 @@ namespace WpfShop.ViewModels
         private readonly CatalogService _catalogService;
         private Product _selectedProduct;
         private string _selectedCategory;
+        private string _searchQuery = "";
+        private CollectionViewSource _productsViewSource;
 
         public CatalogViewModel(CatalogService catalogService)
         {
             _catalogService = catalogService;
             LoadProducts();
+            InitializeViewSource();
         }
 
         public ObservableCollection<Product> Products { get; } = new ObservableCollection<Product>();
         public ObservableCollection<string> Categories { get; } = new ObservableCollection<string>();
+
+        public ICollectionView FilteredProducts => _productsViewSource?.View;
 
         public Product SelectedProduct
         {
@@ -38,7 +44,32 @@ namespace WpfShop.ViewModels
             {
                 _selectedCategory = value;
                 OnPropertyChanged();
-                FilterProductsByCategory();
+                FilterProducts();
+            }
+        }
+
+        public string SearchQuery
+        {
+            get => _searchQuery;
+            set
+            {
+                _searchQuery = value;
+                OnPropertyChanged();
+                FilterProducts();
+            }
+        }
+
+        // Команда очистки поиска
+        private RelayCommand _clearSearchCommand;
+        public RelayCommand ClearSearchCommand
+        {
+            get
+            {
+                return _clearSearchCommand ??
+                  (_clearSearchCommand = new RelayCommand(obj =>
+                  {
+                      SearchQuery = "";
+                  }));
             }
         }
 
@@ -62,7 +93,7 @@ namespace WpfShop.ViewModels
                 .OrderBy(c => c)
                 .ToList();
 
-            Categories.Add("Все товары"); // Добавляем опцию "Все товары"
+            Categories.Add("Все товары");
             foreach (var category in allCategories)
             {
                 Categories.Add(category);
@@ -71,35 +102,47 @@ namespace WpfShop.ViewModels
             SelectedCategory = "Все товары";
         }
 
-        private void FilterProductsByCategory()
+        private void InitializeViewSource()
         {
-            var allProducts = _catalogService.getAll();
+            _productsViewSource = new CollectionViewSource { Source = Products };
+            _productsViewSource.Filter += OnProductsFilter;
+        }
 
-            Products.Clear();
-
-            if (SelectedCategory == "Все товары" || string.IsNullOrEmpty(SelectedCategory))
+        private void OnProductsFilter(object sender, FilterEventArgs e)
+        {
+            var product = e.Item as Product;
+            if (product == null)
             {
-                // Показываем все товары
-                foreach (var product in allProducts)
-                {
-                    Products.Add(product);
-                }
+                e.Accepted = false;
+                return;
+            }
+
+            // Фильтрация по категории
+            bool categoryMatch = SelectedCategory == "Все товары" ||
+                               product.categories.Contains(SelectedCategory);
+
+            // Фильтрация по поисковому запросу
+            bool searchMatch = string.IsNullOrWhiteSpace(SearchQuery) ||
+                             product.title.ToLower().Contains(SearchQuery.ToLower()) ||
+                             (product.description ?? "").ToLower().Contains(SearchQuery.ToLower()) ||
+                             product.tags.Any(tag => tag.ToLower().Contains(SearchQuery.ToLower()));
+
+            e.Accepted = categoryMatch && searchMatch;
+        }
+
+        private void FilterProducts()
+        {
+            _productsViewSource?.View?.Refresh();
+
+            // Автоматически выбираем первый товар после фильтрации
+            if (FilteredProducts != null && FilteredProducts.Cast<Product>().Any())
+            {
+                SelectedProduct = FilteredProducts.Cast<Product>().First();
             }
             else
             {
-                // Фильтруем по выбранной категории
-                var filteredProducts = allProducts
-                    .Where(p => p.categories.Contains(SelectedCategory))
-                    .ToList();
-
-                foreach (var product in filteredProducts)
-                {
-                    Products.Add(product);
-                }
+                SelectedProduct = null;
             }
-
-            // Выбираем первый товар для отображения
-            SelectedProduct = Products.FirstOrDefault();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

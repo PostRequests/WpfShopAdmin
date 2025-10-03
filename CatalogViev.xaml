@@ -69,7 +69,7 @@
                            FontWeight="SemiBold" 
                            TextWrapping="Wrap"
                            Margin="0,0,0,4"/>
-                <TextBlock Text="{Binding price, StringFormat='{}{0:C}'}" 
+                <TextBlock Text="{Binding price, StringFormat='Цена: {0} ₽'}" 
                            Foreground="{StaticResource PrimaryOrangeBrush}"
                            FontWeight="Bold"/>
                 <TextBlock Text="{Binding stock, StringFormat='В наличии: {0} шт.'}" 
@@ -142,35 +142,89 @@
         BorderBrush="{StaticResource BorderBrush}" 
         BorderThickness="1"
         Margin="5,0,5,0">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-                    <TextBlock Text="Товары" 
+        <TextBlock Text="Товары" 
                    FontSize="16" 
                    FontWeight="Bold"
                    Margin="10,10,10,5"
                    Grid.Row="0"/>
 
-                    <TextBlock Text="{Binding SelectedCategory, StringFormat='Категория: {0}'}"
+        <TextBlock Text="{Binding SelectedCategory, StringFormat='Категория: {0}'}"
                    FontSize="12"
                    Foreground="Gray"
-                   Margin="10,0,10,10"
+                   Margin="10,0,10,5"
                    Grid.Row="1"/>
 
-                    <!-- ListBox занимает все оставшееся пространство со скроллом -->
-                    <ListBox ItemsSource="{Binding Products}"
+        <!-- Строка поиска -->
+        <StackPanel Grid.Row="2" 
+                    Orientation="Horizontal" 
+                    Margin="10,5,10,10"
+                    VerticalAlignment="Center">
+            <TextBlock Text="Поиск:" 
+                       FontSize="12"
+                       Foreground="Gray"
+                       VerticalAlignment="Center"
+                       Margin="0,0,5,0"/>
+            
+            <TextBox x:Name="SearchTextBox"
+                     Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                     Width="150"
+                     Height="25"
+                     Padding="5,2"
+                     FontSize="12">
+                <TextBox.Style>
+                    <Style TargetType="TextBox">
+                        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+                        <Setter Property="BorderThickness" Value="1"/>
+                        <Setter Property="Background" Value="White"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="BorderBrush" Value="{StaticResource PrimaryOrangeBrush}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBox.Style>
+            </TextBox>
+            
+            <!-- Кнопка очистки поиска -->
+            <Button Content="✕"
+                    Width="25"
+                    Height="25"
+                    Margin="5,0,0,0"
+                    Background="Transparent"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    FontSize="10"
+                    Command="{Binding ClearSearchCommand}">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding SearchQuery}" Value="">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+        </StackPanel>
+
+        <!-- ListBox занимает все оставшееся пространство со скроллом -->
+        <ListBox ItemsSource="{Binding FilteredProducts}"
                  SelectedItem="{Binding SelectedProduct}"
                  ItemContainerStyle="{StaticResource ProductListBoxItemStyle}"
                  ItemTemplate="{StaticResource ProductItemTemplate}"
                  BorderThickness="0"
-                 Grid.Row="2"
+                 Grid.Row="3"
                  ScrollViewer.VerticalScrollBarVisibility="Auto"/>
-                </Grid>
-            </Border>
+    </Grid>
+</Border>
             <!-- Правая панель - Детали товара -->
             <Border Grid.Column="2" 
                     Background="White" 
@@ -268,7 +322,7 @@
                         </TextBlock>
 
                         <!-- Цена -->
-                        <TextBlock Text="{Binding SelectedProduct.price, StringFormat='Цена: {0:C}'}" 
+                        <TextBlock Text="{Binding SelectedProduct.price, StringFormat='Цена: {0} ₽'}" 
                                    FontSize="20" 
                                    FontWeight="Bold"
                                    Foreground="{StaticResource PrimaryOrangeBrush}"
