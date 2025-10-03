@@ -1,0 +1,176 @@
+﻿<Window x:Class="WpfShop.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfShop"
+        mc:Ignorable="d"
+        Title="Магазин запчастей ИЖ - Вход в систему" 
+        Height="600" Width="400"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <!-- Оранжевая цветовая палитра -->
+        <Color x:Key="PrimaryOrange">#FF9800</Color>
+        <Color x:Key="DarkOrange">#F57C00</Color>
+        <Color x:Key="LightOrange">#FFB74D</Color>
+        <Color x:Key="BackgroundColor">#FFF8F2</Color>
+        <Color x:Key="TextColor">#333333</Color>
+
+        <SolidColorBrush x:Key="PrimaryOrangeBrush" Color="{StaticResource PrimaryOrange}"/>
+        <SolidColorBrush x:Key="DarkOrangeBrush" Color="{StaticResource DarkOrange}"/>
+        <SolidColorBrush x:Key="LightOrangeBrush" Color="{StaticResource LightOrange}"/>
+        <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
+        <SolidColorBrush x:Key="TextBrush" Color="{StaticResource TextColor}"/>
+
+        <!-- Стиль для кнопок -->
+        <Style x:Key="OrangeButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource PrimaryOrangeBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource DarkOrangeBrush}"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="{StaticResource DarkOrangeBrush}"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" Value="{StaticResource LightOrangeBrush}"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="Opacity" Value="0.6"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Стиль для текстовых полей -->
+        <Style x:Key="OrangeTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource LightOrangeBrush}"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+
+        <!-- Стиль для текста -->
+        <Style x:Key="TitleTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,0,30"/>
+        </Style>
+
+        <Style x:Key="LabelTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Background="{StaticResource BackgroundBrush}">
+        <Border Background="White" 
+                Margin="30" 
+                Padding="30"
+                BorderBrush="{StaticResource LightOrangeBrush}"
+                BorderThickness="1"
+                CornerRadius="12">
+
+            <StackPanel>
+                <!-- Заголовок -->
+                <TextBlock Style="{StaticResource TitleTextStyle}" 
+                           Text="Администратор"/>
+
+                <!-- Иконка пользователя -->
+                <Viewbox Width="80" Height="80" Margin="0,0,0,20" HorizontalAlignment="Center">
+                    <Canvas Width="24" Height="24">
+                        <Path Fill="{StaticResource PrimaryOrangeBrush}" 
+                              Data="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/>
+                    </Canvas>
+                </Viewbox>
+
+                <!-- Форма входа -->
+                <StackPanel Margin="0,20,0,0">
+                    <!-- Номер телефона -->
+                    <TextBlock Style="{StaticResource LabelTextStyle}" 
+                               Text="Номер телефона"/>
+                    <TextBox x:Name="PhoneTextBox" 
+                             Style="{StaticResource OrangeTextBoxStyle}"
+                             Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}"
+                             MaxLength="16"/>
+
+                    <!-- Пароль -->
+                    <TextBlock Style="{StaticResource LabelTextStyle}" 
+                               Text="Пароль" 
+                               Margin="0,20,0,0"/>
+                    <PasswordBox x:Name="PasswordBox" 
+                                 BorderBrush="{StaticResource LightOrangeBrush}"
+                                 BorderThickness="2"
+                                 Padding="12,8"
+                                 FontSize="14"/>
+
+                    <!-- Кнопка входа -->
+                    <Button x:Name="LoginButton" 
+                            Style="{StaticResource OrangeButtonStyle}"
+                            Content="Войти в систему" 
+                            Margin="0,30,0,10"
+                            Height="45"
+                            FontSize="16"
+                            Command="{Binding LoginCommand}"/>
+
+                    <!-- Сообщение о статусе -->
+                    <TextBlock Text="{Binding StatusMessage}"
+                               FontSize="13"
+                               FontWeight="Medium"
+                               HorizontalAlignment="Center"
+                               TextWrapping="Wrap"
+                               Margin="0,15,0,0"
+                               Foreground="{Binding StatusColor}"/>
+
+                    <!-- Ссылка на регистрацию -->
+                    <TextBlock HorizontalAlignment="Center" 
+                               Margin="0,15,0,0"
+                               FontSize="13"
+                               Foreground="{StaticResource PrimaryOrangeBrush}">
+                        <Hyperlink Foreground="{StaticResource PrimaryOrangeBrush}">
+                            <Run Text="Нет аккаунта? Зарегистрироваться"/>
+                        </Hyperlink>
+                    </TextBlock>
+                </StackPanel>
+
+                <!-- Разделитель -->
+                <Border Height="1" 
+                        Background="{StaticResource LightOrangeBrush}" 
+                        Margin="0,25,0,25"
+                        Opacity="0.5"/>
+
+                <!-- Тестовые данные -->
+                <StackPanel>
+                    <TextBlock Text="Тестовые данные:" 
+                               HorizontalAlignment="Center"
+                               Foreground="{StaticResource TextBrush}"
+                               FontSize="12"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,10"/>
+
+                    <TextBlock Text="Админ: 89991112233 / пароль: admin123" 
+                               HorizontalAlignment="Center"
+                               Foreground="{StaticResource TextBrush}"
+                               FontSize="11"
+                               Margin="0,0,0,5"/>
+
+                    <TextBlock Text="Пользователь: 89995556677 / пароль: user123" 
+                               HorizontalAlignment="Center"
+                               Foreground="{StaticResource TextBrush}"
+                               FontSize="11"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
