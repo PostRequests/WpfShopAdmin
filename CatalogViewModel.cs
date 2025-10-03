@@ -5,6 +5,9 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Data;
 using System;
+using System.Windows.Media.Imaging;
+using System.IO;
+using System.Collections.Generic;
 
 namespace WpfShop.ViewModels
 {
@@ -19,6 +22,8 @@ namespace WpfShop.ViewModels
         private bool _isProductChanged = false;
         private string _saveStatus = "";
         private System.Windows.Media.Brush _saveStatusColor = System.Windows.Media.Brushes.Gray;
+        private BitmapImage _selectedProductImage;
+        private string _selectedProductImageUrls = "";
 
         public CatalogViewModel(CatalogService catalogService)
         {
@@ -51,16 +56,41 @@ namespace WpfShop.ViewModels
                     _selectedProduct.PropertyChanged += SelectedProduct_PropertyChanged;
                     SelectedProductTags = string.Join(", ", _selectedProduct.tags ?? new List<string>());
                     SelectedProductCategories = string.Join(", ", _selectedProduct.categories ?? new List<string>());
+                    SelectedProductImageUrls = string.Join(Environment.NewLine, _selectedProduct.imageUrls ?? new List<string>());
+                    LoadSelectedProductImage();
                 }
                 else
                 {
                     SelectedProductTags = "";
                     SelectedProductCategories = "";
+                    SelectedProductImageUrls = "";
+                    SelectedProductImage = null;
                 }
 
                 IsProductChanged = false;
                 SaveStatus = "";
                 OnPropertyChanged();
+            }
+        }
+
+        public BitmapImage SelectedProductImage
+        {
+            get => _selectedProductImage;
+            set
+            {
+                _selectedProductImage = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string SelectedProductImageUrls
+        {
+            get => _selectedProductImageUrls;
+            set
+            {
+                _selectedProductImageUrls = value;
+                OnPropertyChanged();
+                UpdateImageUrlsFromString();
             }
         }
 
@@ -143,6 +173,102 @@ namespace WpfShop.ViewModels
         private void SelectedProduct_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             IsProductChanged = true;
+
+            // Если изменились imageUrls, обновляем изображение и текстовое поле
+            if (e.PropertyName == nameof(Product.imageUrls))
+            {
+                SelectedProductImageUrls = string.Join(Environment.NewLine, _selectedProduct.imageUrls ?? new List<string>());
+                LoadSelectedProductImage();
+            }
+        }
+
+        private void LoadSelectedProductImage()
+        {
+            if (_selectedProduct?.imageUrls?.Count > 0)
+            {
+                // Берем первое изображение из списка
+                var imageUrl = _selectedProduct.imageUrls[0];
+                LoadImageFromPath(imageUrl);
+            }
+            else
+            {
+                SelectedProductImage = null;
+            }
+        }
+
+        private void LoadImageFromPath(string imagePath)
+        {
+            try
+            {
+                string fullPath = imagePath;
+
+                // Если путь не абсолютный, добавляем базовую папку
+                if (!Path.IsPathRooted(imagePath))
+                {
+                    // Пробуем разные возможные расположения
+                    string[] possiblePaths = {
+                        Path.Combine("data", "images", imagePath),
+                        Path.Combine("images", imagePath),
+                        Path.Combine("data", "images", Path.GetFileName(imagePath)),
+                        Path.Combine("images", Path.GetFileName(imagePath)),
+                        imagePath
+                    };
+
+                    foreach (string path in possiblePaths)
+                    {
+                        if (File.Exists(path))
+                        {
+                            fullPath = Path.GetFullPath(path);
+                            break;
+                        }
+                    }
+                }
+
+                if (File.Exists(fullPath))
+                {
+                    // Создаем BitmapImage с правильными настройками
+                    var bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.UriSource = new Uri(fullPath, UriKind.Absolute);
+                    bitmap.EndInit();
+                    bitmap.Freeze(); // Важно для использования в UI
+
+                    SelectedProductImage = bitmap;
+                    Console.WriteLine($"Изображение загружено: {fullPath}");
+                }
+                else
+                {
+                    SelectedProductImage = null;
+                    Console.WriteLine($"Изображение не найдено: {fullPath}");
+                }
+            }
+            catch (Exception ex)
+            {
+                SelectedProductImage = null;
+                Console.WriteLine($"Ошибка загрузки изображения: {ex.Message}");
+            }
+        }
+
+        private void UpdateImageUrlsFromString()
+        {
+            if (_selectedProduct != null)
+            {
+                var newImageUrls = SelectedProductImageUrls
+                    .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(url => url.Trim())
+                    .Where(url => !string.IsNullOrEmpty(url))
+                    .ToList();
+
+                if (!newImageUrls.SequenceEqual(_selectedProduct.imageUrls ?? new List<string>()))
+                {
+                    _selectedProduct.imageUrls = newImageUrls;
+                    IsProductChanged = true;
+
+                    // Перезагружаем основное изображение
+                    LoadSelectedProductImage();
+                }
+            }
         }
 
         private void UpdateTagsFromString()
