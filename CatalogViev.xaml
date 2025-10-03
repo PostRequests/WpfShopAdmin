@@ -129,7 +129,7 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Text="Каталог запчастей ИЖ" 
+                <TextBlock Text="Каталог запчастей" 
                            FontSize="20" 
                            FontWeight="Bold" 
                            Foreground="White"
@@ -270,7 +270,7 @@
                     Margin="5,0,0,0">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="15">
-                        <!-- Изображение (простая заглушка) -->
+                        <!-- Изображение -->
                         <Border BorderBrush="{StaticResource BorderBrush}" 
                                 BorderThickness="1" 
                                 Background="#F8F8F8"
