@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ConsoleShop;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using WpfShop.ViewModels;
 
 namespace WpfShop
 {
@@ -22,6 +24,18 @@ namespace WpfShop
         public CatalogViev()
         {
             InitializeComponent();
+            var productRepository = new JsonProductRepository("data/products.json");
+            var catalogService = new CatalogService(productRepository);
+
+            DataContext = new CatalogViewModel(catalogService);
+        }
+
+        private void LogoutButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Возврат к окну авторизации
+            var authWindow = new MainWindow();
+            authWindow.Show();
+            this.Close();
         }
     }
 }

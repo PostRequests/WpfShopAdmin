@@ -1,12 +1,297 @@
 ﻿<Window x:Class="WpfShop.CatalogViev"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:WpfShop"
-        mc:Ignorable="d"
-        Title="CatalogViev" Height="450" Width="800">
-    <Grid>
-        
+        Title="Каталог запчастей ИЖ" 
+        Height="700" Width="1000"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <!-- Цветовая схема -->
+        <Color x:Key="PrimaryOrange">#FF9800</Color>
+        <Color x:Key="LightOrange">#FFE0B2</Color>
+        <Color x:Key="BackgroundColor">#FAFAFA</Color>
+        <Color x:Key="BorderColor">#E0E0E0</Color>
+
+        <SolidColorBrush x:Key="PrimaryOrangeBrush" Color="{StaticResource PrimaryOrange}"/>
+        <SolidColorBrush x:Key="LightOrangeBrush" Color="{StaticResource LightOrange}"/>
+        <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
+        <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
+
+        <!-- Стиль для кнопки выхода -->
+        <Style x:Key="ExitButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="White"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <!-- Стиль для списка категорий -->
+        <Style x:Key="CategoryListBoxItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{StaticResource PrimaryOrangeBrush}"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource LightOrangeBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Стиль для списка товаров -->
+        <Style x:Key="ProductListBoxItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{StaticResource LightOrangeBrush}"/>
+                    <Setter Property="BorderBrush" Value="{StaticResource PrimaryOrangeBrush}"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource LightOrangeBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- DataTemplate для товара в списке -->
+        <DataTemplate x:Key="ProductItemTemplate">
+            <StackPanel>
+                <TextBlock Text="{Binding title}" 
+                           FontWeight="SemiBold" 
+                           TextWrapping="Wrap"
+                           Margin="0,0,0,4"/>
+                <TextBlock Text="{Binding price, StringFormat='{}{0:C}'}" 
+                           Foreground="{StaticResource PrimaryOrangeBrush}"
+                           FontWeight="Bold"/>
+                <TextBlock Text="{Binding stock, StringFormat='В наличии: {0} шт.'}" 
+                           FontSize="11"
+                           Foreground="Gray"/>
+            </StackPanel>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid Background="{StaticResource BackgroundBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Шапка -->
+        <Border Background="{StaticResource PrimaryOrangeBrush}" Grid.Row="0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="Каталог запчастей ИЖ" 
+                           FontSize="20" 
+                           FontWeight="Bold" 
+                           Foreground="White"
+                           VerticalAlignment="Center"
+                           Margin="20,10"/>
+
+                <Button Grid.Column="1"
+                        Content="Выйти" 
+                        Style="{StaticResource ExitButtonStyle}"
+                        Margin="0,0,20,0"
+                        Click="LogoutButton_Click"/>
+            </Grid>
+        </Border>
+
+        <!-- Основное содержимое -->
+        <Grid Grid.Row="1" Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="250"/>
+                <ColumnDefinition Width="400"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Левая панель - Категории -->
+            <Border Grid.Column="0" 
+                    Background="White" 
+                    BorderBrush="{StaticResource BorderBrush}" 
+                    BorderThickness="1"
+                    Margin="0,0,5,0">
+                <StackPanel>
+                    <TextBlock Text="Категории" 
+                               FontSize="16" 
+                               FontWeight="Bold"
+                               Margin="10,10,10,5"/>
+
+                    <ListBox ItemsSource="{Binding Categories}"
+                             SelectedItem="{Binding SelectedCategory}"
+                             ItemContainerStyle="{StaticResource CategoryListBoxItemStyle}"
+                             BorderThickness="0"
+                             Background="Transparent"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Центральная панель - Список товаров -->
+            <Border Grid.Column="1" 
+        Background="White" 
+        BorderBrush="{StaticResource BorderBrush}" 
+        BorderThickness="1"
+        Margin="5,0,5,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="Товары" 
+                   FontSize="16" 
+                   FontWeight="Bold"
+                   Margin="10,10,10,5"
+                   Grid.Row="0"/>
+
+                    <TextBlock Text="{Binding SelectedCategory, StringFormat='Категория: {0}'}"
+                   FontSize="12"
+                   Foreground="Gray"
+                   Margin="10,0,10,10"
+                   Grid.Row="1"/>
+
+                    <!-- ListBox занимает все оставшееся пространство со скроллом -->
+                    <ListBox ItemsSource="{Binding Products}"
+                 SelectedItem="{Binding SelectedProduct}"
+                 ItemContainerStyle="{StaticResource ProductListBoxItemStyle}"
+                 ItemTemplate="{StaticResource ProductItemTemplate}"
+                 BorderThickness="0"
+                 Grid.Row="2"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                </Grid>
+            </Border>
+            <!-- Правая панель - Детали товара -->
+            <Border Grid.Column="2" 
+                    Background="White" 
+                    BorderBrush="{StaticResource BorderBrush}" 
+                    BorderThickness="1"
+                    Margin="5,0,0,0">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="15">
+                        <!-- Изображение (простая заглушка) -->
+                        <Border BorderBrush="{StaticResource BorderBrush}" 
+                                BorderThickness="1" 
+                                Background="#F8F8F8"
+                                Height="200"
+                                Margin="0,0,0,15">
+                            <TextBlock Text="Изображение товара" 
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Foreground="Gray"/>
+                        </Border>
+
+                        <!-- Название -->
+                        <TextBlock Text="{Binding SelectedProduct.title}" 
+                                   FontSize="18" 
+                                   FontWeight="Bold"
+                                   TextWrapping="Wrap"
+                                   Margin="0,0,0,10"/>
+
+                        <!-- Теги -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <TextBlock Text="Теги: " 
+                                       FontWeight="SemiBold"
+                                       Foreground="Gray"/>
+                            <ItemsControl ItemsSource="{Binding SelectedProduct.tags}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{StaticResource LightOrangeBrush}"
+                                                CornerRadius="10"
+                                                Margin="2,0,2,2"
+                                                Padding="6,2">
+                                            <TextBlock Text="{Binding .}" 
+                                                       FontSize="11"
+                                                       Foreground="#666"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+
+                        <!-- Описание -->
+                        <TextBlock Text="Описание:" 
+                                   FontWeight="SemiBold"
+                                   Foreground="Gray"
+                                   Margin="0,0,0,5"/>
+                        <TextBlock Text="{Binding SelectedProduct.description}" 
+                                   TextWrapping="Wrap"
+                                   Margin="0,0,0,15"
+                                   FontSize="13"/>
+
+                        <!-- Наличие (простой текст) -->
+                        <TextBlock Text="{Binding SelectedProduct.stock, StringFormat='Наличие: {0} шт.'}" 
+                                   FontWeight="SemiBold"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,0,0,10">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedProduct.stock}" Value="0">
+                                            <Setter Property="Foreground" Value="Red"/>
+                                            <Setter Property="Text" Value="НЕТ В НАЛИЧИИ"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding SelectedProduct.stock}" Value="1">
+                                            <Setter Property="Foreground" Value="Orange"/>
+                                            <Setter Property="Text" Value="Мало (1 шт.)"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding SelectedProduct.stock}" Value="2">
+                                            <Setter Property="Foreground" Value="Orange"/>
+                                            <Setter Property="Text" Value="Мало (2 шт.)"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding SelectedProduct.stock}" Value="3">
+                                            <Setter Property="Foreground" Value="Orange"/>
+                                            <Setter Property="Text" Value="Мало (3 шт.)"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding SelectedProduct.stock}" Value="4">
+                                            <Setter Property="Foreground" Value="Orange"/>
+                                            <Setter Property="Text" Value="Мало (4 шт.)"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <!-- Цена -->
+                        <TextBlock Text="{Binding SelectedProduct.price, StringFormat='Цена: {0:C}'}" 
+                                   FontSize="20" 
+                                   FontWeight="Bold"
+                                   Foreground="{StaticResource PrimaryOrangeBrush}"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,0,0,15"/>
+
+                        <!-- Категории -->
+                        <TextBlock Text="Категории:" 
+                                   FontWeight="SemiBold"
+                                   Foreground="Gray"
+                                   Margin="0,0,0,5"/>
+                        <ItemsControl ItemsSource="{Binding SelectedProduct.categories}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding .}" 
+                                               FontSize="12"
+                                               Margin="0,1"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
     </Grid>
 </Window>
