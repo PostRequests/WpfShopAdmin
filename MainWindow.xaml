@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:WpfShop"
         mc:Ignorable="d"
         Title="Магазин запчастей ИЖ - Вход в систему" 
-        Height="600" Width="400"
+        Height="650" Width="400"
         WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
@@ -133,15 +133,7 @@
                                Margin="0,15,0,0"
                                Foreground="{Binding StatusColor}"/>
 
-                    <!-- Ссылка на регистрацию -->
-                    <TextBlock HorizontalAlignment="Center" 
-                               Margin="0,15,0,0"
-                               FontSize="13"
-                               Foreground="{StaticResource PrimaryOrangeBrush}">
-                        <Hyperlink Foreground="{StaticResource PrimaryOrangeBrush}">
-                            <Run Text="Нет аккаунта? Зарегистрироваться"/>
-                        </Hyperlink>
-                    </TextBlock>
+                    
                 </StackPanel>
 
                 <!-- Разделитель -->
@@ -150,26 +142,7 @@
                         Margin="0,25,0,25"
                         Opacity="0.5"/>
 
-                <!-- Тестовые данные -->
-                <StackPanel>
-                    <TextBlock Text="Тестовые данные:" 
-                               HorizontalAlignment="Center"
-                               Foreground="{StaticResource TextBrush}"
-                               FontSize="12"
-                               FontWeight="SemiBold"
-                               Margin="0,0,0,10"/>
-
-                    <TextBlock Text="Админ: 89991112233 / пароль: admin123" 
-                               HorizontalAlignment="Center"
-                               Foreground="{StaticResource TextBrush}"
-                               FontSize="11"
-                               Margin="0,0,0,5"/>
-
-                    <TextBlock Text="Пользователь: 89995556677 / пароль: user123" 
-                               HorizontalAlignment="Center"
-                               Foreground="{StaticResource TextBrush}"
-                               FontSize="11"/>
-                </StackPanel>
+                
             </StackPanel>
         </Border>
     </Grid>

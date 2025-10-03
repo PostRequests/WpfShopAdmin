@@ -86,6 +86,9 @@ namespace WpfShop.ViewModels
                               MessageBox.Show("Добро пожаловать в магазин!", "Успешный вход",
                                             MessageBoxButton.OK, MessageBoxImage.Information);
                           }
+
+                          // Открываем каталог и закрываем текущее окно
+                          OpenCatalogAndClose();
                       }
                       else
                       {
@@ -97,6 +100,24 @@ namespace WpfShop.ViewModels
                   obj => !string.IsNullOrWhiteSpace(Phone) &&
                          !string.IsNullOrWhiteSpace(Password) &&
                          Phone.Length >= 11));
+            }
+        }
+
+        // Открывает каталог, закрывает текущее окно
+        private void OpenCatalogAndClose()
+        {
+            // Получаем текущее окно
+            var currentWindow = Application.Current.Windows.OfType<Window>()
+                .FirstOrDefault(w => w.IsActive);
+
+            if (currentWindow != null)
+            {
+                // Создаем и показываем новое окно каталога
+                var catalogWindow = new CatalogViev();
+                catalogWindow.Show();
+
+                // Закрываем текущее окно авторизации
+                currentWindow.Close();
             }
         }
 
