@@ -11,13 +11,10 @@
             <Setter Property="Margin" Value="2"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Foreground" Value="#FF9800"/>
-            <!-- Оранжевый текст по умолчанию -->
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
                     <Setter Property="Background" Value="#FFE0B2"/>
-                    <!-- Светло-оранжевый фон -->
                     <Setter Property="Foreground" Value="#FF9800"/>
-                    <!-- Текст остаётся оранжевым -->
                     <Setter Property="FontWeight" Value="SemiBold"/>
                 </Trigger>
                 <Trigger Property="IsMouseOver" Value="True">
