@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -29,6 +30,7 @@ namespace WpfShop.ViewModels
         private string _selectedProductImageUrls = "";
         private string _selectedProductTags = "";
         private string _selectedProductCategories = "";
+        private int _selectedProductId = 0;
 
         public CatalogViewModel(CatalogService catalogService)
         {
@@ -55,6 +57,9 @@ namespace WpfShop.ViewModels
                 }
 
                 _selectedProduct = value;
+
+                // Сохраняем ID выбранного товара
+                _selectedProductId = _selectedProduct?.id ?? 0;
 
                 if (_selectedProduct != null)
                 {
@@ -334,12 +339,41 @@ namespace WpfShop.ViewModels
             }
         }
 
+        // Команда для добавления нового товара
+        private RelayCommand _addNewProductCommand;
+        public RelayCommand AddNewProductCommand
+        {
+            get
+            {
+                return _addNewProductCommand ?? (_addNewProductCommand = new RelayCommand(obj =>
+                {
+                    AddNewProduct();
+                }));
+            }
+        }
+
+        // Команда для удаления товара
+        private RelayCommand _deleteProductCommand;
+        public RelayCommand DeleteProductCommand
+        {
+            get
+            {
+                return _deleteProductCommand ?? (_deleteProductCommand = new RelayCommand(obj =>
+                {
+                    DeleteProduct();
+                }, obj => SelectedProduct != null)); // Можно удалять только если есть выбранный товар
+            }
+        }
+
         private void SaveProductChanges()
         {
             if (SelectedProduct != null && IsProductChanged)
             {
                 try
                 {
+                    // Сохраняем ID перед сохранением
+                    int currentProductId = SelectedProduct.id;
+
                     // Обновляем теги и категории из строк перед сохранением
                     UpdateTagsFromString();
                     UpdateCategoriesFromString();
@@ -352,11 +386,8 @@ namespace WpfShop.ViewModels
                         SaveStatusColor = Brushes.Green;
                         IsProductChanged = false;
 
-                        // НЕ перезагружаем список - товар уже обновлен в памяти
-                        // LoadProducts(); // Закомментировать эту строку
-
-                        // Просто обновляем привязки
-                        OnPropertyChanged(nameof(SelectedProduct));
+                        // Обновляем список продуктов и восстанавливаем выделение
+                        LoadProductsAndRestoreSelection(currentProductId);
                     }
                     else
                     {
@@ -372,7 +403,81 @@ namespace WpfShop.ViewModels
             }
         }
 
-        private void LoadProducts()
+        private void AddNewProduct()
+        {
+            try
+            {
+                // Создаем новый товар с базовыми значениями
+                var newProduct = new Product
+                {
+                    id = 0, // 0 - признак нового товара
+                    title = "Новый товар",
+                    description = "Описание товара",
+                    price = 0,
+                    stock = 0,
+                    tags = new List<string>(),
+                    categories = new List<string>(),
+                    imageUrls = new List<string>()
+                };
+
+                // Используем AdminCatalogService для создания товара
+                var createdProduct = _adminCatalogService.create(newProduct);
+
+                // Обновляем список товаров
+                LoadProducts();
+
+                // Выбираем созданный товар
+                SelectedProduct = Products.FirstOrDefault(p => p.id == createdProduct.id);
+
+                SaveStatus = "✅ Новый товар создан";
+                SaveStatusColor = Brushes.Green;
+            }
+            catch (Exception ex)
+            {
+                SaveStatus = $"❌ Ошибка при создании товара: {ex.Message}";
+                SaveStatusColor = Brushes.Red;
+            }
+        }
+
+        private void DeleteProduct()
+        {
+            if (SelectedProduct == null)
+                return;
+
+            var result = MessageBox.Show(
+                $"Вы уверены, что хотите удалить товар \"{SelectedProduct.title}\"?",
+                "Подтверждение удаления",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                try
+                {
+                    var deleteResult = _adminCatalogService.delete(SelectedProduct.id);
+                    if (deleteResult.ok)
+                    {
+                        SaveStatus = "✅ Товар удален";
+                        SaveStatusColor = Brushes.Green;
+
+                        // Обновляем список товаров
+                        LoadProducts();
+                    }
+                    else
+                    {
+                        SaveStatus = $"❌ Ошибка при удалении: {deleteResult.error}";
+                        SaveStatusColor = Brushes.Red;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    SaveStatus = $"❌ Ошибка при удалении: {ex.Message}";
+                    SaveStatusColor = Brushes.Red;
+                }
+            }
+        }
+
+        private void LoadProductsAndRestoreSelection(int productIdToSelect = 0)
         {
             var allProducts = _catalogService.getAll();
 
@@ -398,7 +503,28 @@ namespace WpfShop.ViewModels
                 Categories.Add(category);
             }
 
-            SelectedCategory = "Все товары";
+            // Восстанавливаем выделение
+            if (productIdToSelect > 0)
+            {
+                var productToSelect = allProducts.FirstOrDefault(p => p.id == productIdToSelect);
+                if (productToSelect != null)
+                {
+                    SelectedProduct = productToSelect;
+                }
+                else
+                {
+                    SelectedCategory = "Все товары";
+                }
+            }
+            else
+            {
+                SelectedCategory = "Все товары";
+            }
+        }
+
+        private void LoadProducts()
+        {
+            LoadProductsAndRestoreSelection(_selectedProductId);
         }
 
         private void InitializeViewSource()
