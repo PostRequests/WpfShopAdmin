@@ -270,22 +270,28 @@
         Margin="5,0,0,0">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="15">
+
+
                         <!-- Изображение товара -->
                         <Border BorderBrush="{StaticResource BorderBrush}" 
-                    BorderThickness="1" 
-                    Background="#F8F8F8"
-                    Height="200"
-                    Margin="0,0,0,15">
+        BorderThickness="1" 
+        Background="#F8F8F8"
+        Height="200"
+        Margin="0,0,0,15">
                             <Grid>
-                                <Image Source="{Binding SelectedProductImage}" 
-                           Stretch="Uniform"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center">
+                                <!-- Контейнер для изображения -->
+                                <Image x:Name="ProductImage"
+               Source="{Binding CurrentProductImage}"
+               Stretch="Uniform"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center"
+               MaxWidth="180"
+               MaxHeight="180">
                                     <Image.Style>
                                         <Style TargetType="Image">
-                                            <Setter Property="Source" Value="{Binding SelectedProductImage}"/>
+                                            <Setter Property="Visibility" Value="Visible"/>
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding SelectedProductImage}" Value="{x:Null}">
+                                                <DataTrigger Binding="{Binding CurrentProductImage}" Value="{x:Null}">
                                                     <Setter Property="Visibility" Value="Collapsed"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
@@ -293,21 +299,129 @@
                                     </Image.Style>
                                 </Image>
 
-                                
+                                <!-- Заглушка, когда нет изображений -->
+                                <TextBlock Text="Нет изображения" 
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Foreground="Gray"
+                   FontSize="12">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding HasProductImages}" Value="True">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+
+                                <!-- Кнопка предыдущего изображения -->
+                                <Button Content="◀"
+                Command="{Binding PreviousImageCommand}"
+                Width="30"
+                Height="30"
+                Background="{StaticResource PrimaryOrangeBrush}"
+                Foreground="White"
+                BorderThickness="0"
+                FontSize="10"
+                FontWeight="Bold"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Margin="5,0,0,0"
+                Cursor="Hand">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding HasProductImages}" Value="False">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding CanGoToPreviousImage}" Value="False">
+                                                    <Setter Property="IsEnabled" Value="False"/>
+                                                    <Setter Property="Opacity" Value="0.5"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+
+                                <!-- Кнопка следующего изображения -->
+                                <Button Content="▶"
+                Command="{Binding NextImageCommand}"
+                Width="30"
+                Height="30"
+                Background="{StaticResource PrimaryOrangeBrush}"
+                Foreground="White"
+                BorderThickness="0"
+                FontSize="10"
+                FontWeight="Bold"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Margin="0,0,5,0"
+                Cursor="Hand">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding HasProductImages}" Value="False">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding CanGoToNextImage}" Value="False">
+                                                    <Setter Property="IsEnabled" Value="False"/>
+                                                    <Setter Property="Opacity" Value="0.5"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+
+                                <!-- Счетчик изображений -->
+                                <TextBlock Text="{Binding ImageCounter}"
+                   Background="#CC000000"
+                   Foreground="White"
+                   FontSize="10"
+                   Padding="5,2"
+                   HorizontalAlignment="Right"
+                   VerticalAlignment="Bottom"
+                   Margin="0,0,5,5">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding HasProductImages}" Value="False">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
                             </Grid>
                         </Border>
 
-                        <!-- Список изображений -->
-                        <TextBlock Text="Список изображений:" 
-                       FontWeight="SemiBold"
-                       Foreground="Gray"
-                       Margin="0,0,0,5"/>
+                        <!-- Ссылки на изображения -->
+                        <TextBlock Text="Ссылки на изображения:" 
+           FontWeight="SemiBold"
+           Foreground="Gray"
+           Margin="0,0,0,5"/>
                         <TextBox Text="{Binding SelectedProductImageUrls, UpdateSourceTrigger=PropertyChanged}" 
-                     Style="{StaticResource EditTextBoxStyle}"
-                     Margin="0,0,0,15"
-                     AcceptsReturn="True"
-                     MinHeight="60"
-                     ToolTip="Пути к изображениям (каждый с новой строки)"/>
+         Margin="0,0,0,15"
+         AcceptsReturn="True"
+         MinHeight="40"
+         ToolTip="Ссылки на изображения через запятую. Изменения сохраняются автоматически."
+         FontSize="11">
+                            <TextBox.Style>
+                                <Style TargetType="TextBox" BasedOn="{StaticResource EditTextBoxStyle}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedProduct}" Value="{x:Null}">
+                                            <Setter Property="IsEnabled" Value="False"/>
+                                            <Setter Property="Opacity" Value="0.6"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
 
                         <!-- Название -->
                         <TextBlock Text="Название:" 

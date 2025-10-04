@@ -1,13 +1,13 @@
 ﻿using ConsoleShop;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Data;
-using System;
-using System.Windows.Media.Imaging;
-using System.IO;
-using System.Collections.Generic;
+using System.Windows.Input;
+using System.Windows.Media;
 
 namespace WpfShop.ViewModels
 {
@@ -21,9 +21,14 @@ namespace WpfShop.ViewModels
         private CollectionViewSource _productsViewSource;
         private bool _isProductChanged = false;
         private string _saveStatus = "";
-        private System.Windows.Media.Brush _saveStatusColor = System.Windows.Media.Brushes.Gray;
-        private BitmapImage _selectedProductImage;
+        private Brush _saveStatusColor = Brushes.Gray;
+
+        // Новые свойства для работы с изображениями
+        private int _currentImageIndex = 0;
+        private List<string> _currentProductImages = new List<string>();
         private string _selectedProductImageUrls = "";
+        private string _selectedProductTags = "";
+        private string _selectedProductCategories = "";
 
         public CatalogViewModel(CatalogService catalogService)
         {
@@ -56,15 +61,17 @@ namespace WpfShop.ViewModels
                     _selectedProduct.PropertyChanged += SelectedProduct_PropertyChanged;
                     SelectedProductTags = string.Join(", ", _selectedProduct.tags ?? new List<string>());
                     SelectedProductCategories = string.Join(", ", _selectedProduct.categories ?? new List<string>());
-                    SelectedProductImageUrls = string.Join(Environment.NewLine, _selectedProduct.imageUrls ?? new List<string>());
-                    LoadSelectedProductImage();
+                    SelectedProductImageUrls = string.Join(", ", _selectedProduct.imageUrls ?? new List<string>());
+                    UpdateProductImages();
                 }
                 else
                 {
                     SelectedProductTags = "";
                     SelectedProductCategories = "";
                     SelectedProductImageUrls = "";
-                    SelectedProductImage = null;
+                    _currentProductImages.Clear();
+                    _currentImageIndex = 0;
+                    UpdateImageProperties();
                 }
 
                 IsProductChanged = false;
@@ -73,13 +80,25 @@ namespace WpfShop.ViewModels
             }
         }
 
-        public BitmapImage SelectedProductImage
+        public string SelectedProductTags
         {
-            get => _selectedProductImage;
+            get => _selectedProductTags;
             set
             {
-                _selectedProductImage = value;
+                _selectedProductTags = value;
                 OnPropertyChanged();
+                UpdateTagsFromString();
+            }
+        }
+
+        public string SelectedProductCategories
+        {
+            get => _selectedProductCategories;
+            set
+            {
+                _selectedProductCategories = value;
+                OnPropertyChanged();
+                UpdateCategoriesFromString();
             }
         }
 
@@ -94,29 +113,38 @@ namespace WpfShop.ViewModels
             }
         }
 
-        private string _selectedProductTags = "";
-        public string SelectedProductTags
+        // Свойства для работы с изображениями
+        public string CurrentProductImage
         {
-            get => _selectedProductTags;
-            set
+            get
             {
-                _selectedProductTags = value;
-                OnPropertyChanged();
-                UpdateTagsFromString();
+                if (_currentProductImages == null || _currentProductImages.Count == 0)
+                    return null;
+
+                if (_currentImageIndex >= 0 && _currentImageIndex < _currentProductImages.Count)
+                {
+                    var imagePath = _currentProductImages[_currentImageIndex];
+                    if (!string.IsNullOrEmpty(imagePath))
+                    {
+                        // Преобразуем относительный путь в абсолютный
+                        var fullPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data", "images", imagePath);
+                        if (System.IO.File.Exists(fullPath))
+                        {
+                            return fullPath;
+                        }
+                    }
+                }
+                return null;
             }
         }
 
-        private string _selectedProductCategories = "";
-        public string SelectedProductCategories
-        {
-            get => _selectedProductCategories;
-            set
-            {
-                _selectedProductCategories = value;
-                OnPropertyChanged();
-                UpdateCategoriesFromString();
-            }
-        }
+        public bool HasProductImages => _currentProductImages?.Count > 0;
+
+        public bool CanGoToPreviousImage => HasProductImages && _currentImageIndex > 0;
+
+        public bool CanGoToNextImage => HasProductImages && _currentImageIndex < _currentProductImages.Count - 1;
+
+        public string ImageCounter => HasProductImages ? $"{_currentImageIndex + 1}/{_currentProductImages.Count}" : "";
 
         public bool IsProductChanged
         {
@@ -138,7 +166,7 @@ namespace WpfShop.ViewModels
             }
         }
 
-        public System.Windows.Media.Brush SaveStatusColor
+        public Brush SaveStatusColor
         {
             get => _saveStatusColor;
             set
@@ -173,102 +201,6 @@ namespace WpfShop.ViewModels
         private void SelectedProduct_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             IsProductChanged = true;
-
-            // Если изменились imageUrls, обновляем изображение и текстовое поле
-            if (e.PropertyName == nameof(Product.imageUrls))
-            {
-                SelectedProductImageUrls = string.Join(Environment.NewLine, _selectedProduct.imageUrls ?? new List<string>());
-                LoadSelectedProductImage();
-            }
-        }
-
-        private void LoadSelectedProductImage()
-        {
-            if (_selectedProduct?.imageUrls?.Count > 0)
-            {
-                // Берем первое изображение из списка
-                var imageUrl = _selectedProduct.imageUrls[0];
-                LoadImageFromPath(imageUrl);
-            }
-            else
-            {
-                SelectedProductImage = null;
-            }
-        }
-
-        private void LoadImageFromPath(string imagePath)
-        {
-            try
-            {
-                string fullPath = imagePath;
-
-                // Если путь не абсолютный, добавляем базовую папку
-                if (!Path.IsPathRooted(imagePath))
-                {
-                    // Пробуем разные возможные расположения
-                    string[] possiblePaths = {
-                        Path.Combine("data", "images", imagePath),
-                        Path.Combine("images", imagePath),
-                        Path.Combine("data", "images", Path.GetFileName(imagePath)),
-                        Path.Combine("images", Path.GetFileName(imagePath)),
-                        imagePath
-                    };
-
-                    foreach (string path in possiblePaths)
-                    {
-                        if (File.Exists(path))
-                        {
-                            fullPath = Path.GetFullPath(path);
-                            break;
-                        }
-                    }
-                }
-
-                if (File.Exists(fullPath))
-                {
-                    // Создаем BitmapImage с правильными настройками
-                    var bitmap = new BitmapImage();
-                    bitmap.BeginInit();
-                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                    bitmap.UriSource = new Uri(fullPath, UriKind.Absolute);
-                    bitmap.EndInit();
-                    bitmap.Freeze(); // Важно для использования в UI
-
-                    SelectedProductImage = bitmap;
-                    Console.WriteLine($"Изображение загружено: {fullPath}");
-                }
-                else
-                {
-                    SelectedProductImage = null;
-                    Console.WriteLine($"Изображение не найдено: {fullPath}");
-                }
-            }
-            catch (Exception ex)
-            {
-                SelectedProductImage = null;
-                Console.WriteLine($"Ошибка загрузки изображения: {ex.Message}");
-            }
-        }
-
-        private void UpdateImageUrlsFromString()
-        {
-            if (_selectedProduct != null)
-            {
-                var newImageUrls = SelectedProductImageUrls
-                    .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
-                    .Select(url => url.Trim())
-                    .Where(url => !string.IsNullOrEmpty(url))
-                    .ToList();
-
-                if (!newImageUrls.SequenceEqual(_selectedProduct.imageUrls ?? new List<string>()))
-                {
-                    _selectedProduct.imageUrls = newImageUrls;
-                    IsProductChanged = true;
-
-                    // Перезагружаем основное изображение
-                    LoadSelectedProductImage();
-                }
-            }
         }
 
         private void UpdateTagsFromString()
@@ -307,17 +239,51 @@ namespace WpfShop.ViewModels
             }
         }
 
+        private void UpdateImageUrlsFromString()
+        {
+            if (_selectedProduct != null)
+            {
+                var newImageUrls = SelectedProductImageUrls
+                    .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(url => url.Trim())
+                    .Where(url => !string.IsNullOrEmpty(url))
+                    .ToList();
+
+                if (!newImageUrls.SequenceEqual(_selectedProduct.imageUrls ?? new List<string>()))
+                {
+                    _selectedProduct.imageUrls = newImageUrls;
+                    IsProductChanged = true;
+                    UpdateProductImages();
+                }
+            }
+        }
+
+        private void UpdateProductImages()
+        {
+            _currentProductImages = _selectedProduct?.imageUrls?.Where(url => !string.IsNullOrEmpty(url)).ToList() ?? new List<string>();
+            _currentImageIndex = 0;
+            UpdateImageProperties();
+        }
+
+        private void UpdateImageProperties()
+        {
+            OnPropertyChanged(nameof(CurrentProductImage));
+            OnPropertyChanged(nameof(HasProductImages));
+            OnPropertyChanged(nameof(CanGoToPreviousImage));
+            OnPropertyChanged(nameof(CanGoToNextImage));
+            OnPropertyChanged(nameof(ImageCounter));
+        }
+
         // Команда очистки поиска
         private RelayCommand _clearSearchCommand;
         public RelayCommand ClearSearchCommand
         {
             get
             {
-                return _clearSearchCommand ??
-                  (_clearSearchCommand = new RelayCommand(obj =>
-                  {
-                      SearchQuery = "";
-                  }));
+                return _clearSearchCommand ?? (_clearSearchCommand = new RelayCommand(obj =>
+                {
+                    SearchQuery = "";
+                }));
             }
         }
 
@@ -327,36 +293,78 @@ namespace WpfShop.ViewModels
         {
             get
             {
-                return _saveProductCommand ??
-                  (_saveProductCommand = new RelayCommand(obj =>
-                  {
-                      if (SelectedProduct != null && IsProductChanged)
-                      {
-                          try
-                          {
-                              var result = _adminCatalogService.update(SelectedProduct);
-                              if (result.ok)
-                              {
-                                  SaveStatus = "✅ Изменения сохранены";
-                                  SaveStatusColor = System.Windows.Media.Brushes.Green;
-                                  IsProductChanged = false;
+                return _saveProductCommand ?? (_saveProductCommand = new RelayCommand(obj =>
+                {
+                    SaveProductChanges();
+                }));
+            }
+        }
 
-                                  // Обновляем список продуктов
-                                  LoadProducts();
-                              }
-                              else
-                              {
-                                  SaveStatus = $"❌ Ошибка: {result.error}";
-                                  SaveStatusColor = System.Windows.Media.Brushes.Red;
-                              }
-                          }
-                          catch (Exception ex)
-                          {
-                              SaveStatus = $"❌ Ошибка: {ex.Message}";
-                              SaveStatusColor = System.Windows.Media.Brushes.Red;
-                          }
-                      }
-                  }));
+        // Команда для предыдущего изображения
+        private RelayCommand _previousImageCommand;
+        public RelayCommand PreviousImageCommand
+        {
+            get
+            {
+                return _previousImageCommand ?? (_previousImageCommand = new RelayCommand(obj =>
+                {
+                    if (CanGoToPreviousImage)
+                    {
+                        _currentImageIndex--;
+                        UpdateImageProperties();
+                    }
+                }));
+            }
+        }
+
+        // Команда для следующего изображения
+        private RelayCommand _nextImageCommand;
+        public RelayCommand NextImageCommand
+        {
+            get
+            {
+                return _nextImageCommand ?? (_nextImageCommand = new RelayCommand(obj =>
+                {
+                    if (CanGoToNextImage)
+                    {
+                        _currentImageIndex++;
+                        UpdateImageProperties();
+                    }
+                }));
+            }
+        }
+
+        private void SaveProductChanges()
+        {
+            if (SelectedProduct != null && IsProductChanged)
+            {
+                try
+                {
+                    UpdateTagsFromString();
+                    UpdateCategoriesFromString();
+                    UpdateImageUrlsFromString(); 
+
+                    var result = _adminCatalogService.update(SelectedProduct);
+                    if (result.ok)
+                    {
+                        SaveStatus = "✅ Изменения сохранены";
+                        SaveStatusColor = Brushes.Green;
+                        IsProductChanged = false;
+
+                        // Обновляем список продуктов
+                        LoadProducts();
+                    }
+                    else
+                    {
+                        SaveStatus = $"❌ Ошибка: {result.error}";
+                        SaveStatusColor = Brushes.Red;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    SaveStatus = $"❌ Ошибка: {ex.Message}";
+                    SaveStatusColor = Brushes.Red;
+                }
             }
         }
 
@@ -436,6 +444,28 @@ namespace WpfShop.ViewModels
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
+    public class RelayCommand : ICommand
+    {
+        private readonly Action<object> _execute;
+        private readonly Func<object, bool> _canExecute;
+
+        public RelayCommand(Action<object> execute, Func<object, bool> canExecute = null)
+        {
+            _execute = execute ?? throw new ArgumentNullException(nameof(execute));
+            _canExecute = canExecute;
+        }
+
+        public bool CanExecute(object parameter) => _canExecute == null || _canExecute(parameter);
+
+        public void Execute(object parameter) => _execute(parameter);
+
+        public event EventHandler CanExecuteChanged
+        {
+            add { CommandManager.RequerySuggested += value; }
+            remove { CommandManager.RequerySuggested -= value; }
         }
     }
 }
