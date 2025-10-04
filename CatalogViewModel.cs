@@ -1,9 +1,6 @@
 ﻿using ConsoleShop;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Data;
@@ -14,23 +11,24 @@ namespace WpfShop.ViewModels
 {
     public class CatalogViewModel : INotifyPropertyChanged
     {
-        private readonly CatalogService _catalogService;
-        private readonly AdminCatalogService _adminCatalogService;
-        private Product _selectedProduct;
-        private string _selectedCategory;
-        private string _searchQuery = "";
-        private CollectionViewSource _productsViewSource;
-        private bool _isProductChanged = false;
-        private string _saveStatus = "";
-        private Brush _saveStatusColor = Brushes.Gray;
+        
+        private readonly CatalogService _catalogService;// Сервис для чтения каталога
+        private readonly AdminCatalogService _adminCatalogService;// Сервис для администрирования каталога
+        private Product _selectedProduct; // Текущий выбранный товар в списке
+        private string _selectedCategory;// Название категории, выбранной в фильтре 
+        private string _searchQuery = "";// Текущее значение поискового запроса 
+        private CollectionViewSource _productsViewSource;   // Источник данных для фильтрации и отображения списка товаров
+        private bool _isProductChanged; // Флаг: были ли внесены изменения в данные выбранного товара
+        private string _saveStatus = "";  // Текстовое сообщение о результате последней операции
+        private Brush _saveStatusColor = Brushes.Gray;// Цвет отображения статусного сообщения (зелёный — успех, красный — ошибка)
 
-        // Новые свойства для работы с изображениями
+        // Состояние изображений выбранного товара
         private int _currentImageIndex = 0;
         private List<string> _currentProductImages = new List<string>();
         private string _selectedProductImageUrls = "";
         private string _selectedProductTags = "";
         private string _selectedProductCategories = "";
-        private int _selectedProductId = 0;
+        private int _selectedProductId;
 
         public CatalogViewModel(CatalogService catalogService)
         {
@@ -43,7 +41,6 @@ namespace WpfShop.ViewModels
 
         public ObservableCollection<Product> Products { get; } = new ObservableCollection<Product>();
         public ObservableCollection<string> Categories { get; } = new ObservableCollection<string>();
-
         public ICollectionView FilteredProducts => _productsViewSource?.View;
 
         public Product SelectedProduct
@@ -52,21 +49,17 @@ namespace WpfShop.ViewModels
             set
             {
                 if (_selectedProduct != null)
-                {
                     _selectedProduct.PropertyChanged -= SelectedProduct_PropertyChanged;
-                }
 
                 _selectedProduct = value;
-
-                // Сохраняем ID выбранного товара
                 _selectedProductId = _selectedProduct?.id ?? 0;
 
                 if (_selectedProduct != null)
                 {
                     _selectedProduct.PropertyChanged += SelectedProduct_PropertyChanged;
-                    SelectedProductTags = string.Join(", ", _selectedProduct.tags ?? new List<string>());
-                    SelectedProductCategories = string.Join(", ", _selectedProduct.categories ?? new List<string>());
-                    SelectedProductImageUrls = string.Join(", ", _selectedProduct.imageUrls ?? new List<string>());
+                    SelectedProductTags = string.Join(", ", _selectedProduct.tags ?? Enumerable.Empty<string>());
+                    SelectedProductCategories = string.Join(", ", _selectedProduct.categories ?? Enumerable.Empty<string>());
+                    SelectedProductImageUrls = string.Join(", ", _selectedProduct.imageUrls ?? Enumerable.Empty<string>());
                     UpdateProductImages();
                 }
                 else
@@ -118,12 +111,11 @@ namespace WpfShop.ViewModels
             }
         }
 
-        // Свойства для работы с изображениями
         public string CurrentProductImage
         {
             get
             {
-                if (_currentProductImages == null || _currentProductImages.Count == 0)
+                if (_currentProductImages.Count == 0)
                     return null;
 
                 if (_currentImageIndex >= 0 && _currentImageIndex < _currentProductImages.Count)
@@ -131,24 +123,18 @@ namespace WpfShop.ViewModels
                     var imagePath = _currentProductImages[_currentImageIndex];
                     if (!string.IsNullOrEmpty(imagePath))
                     {
-                        // Преобразуем относительный путь в абсолютный
                         var fullPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data", "images", imagePath);
                         if (System.IO.File.Exists(fullPath))
-                        {
                             return fullPath;
-                        }
                     }
                 }
                 return null;
             }
         }
 
-        public bool HasProductImages => _currentProductImages?.Count > 0;
-
+        public bool HasProductImages => _currentProductImages.Count > 0;
         public bool CanGoToPreviousImage => HasProductImages && _currentImageIndex > 0;
-
         public bool CanGoToNextImage => HasProductImages && _currentImageIndex < _currentProductImages.Count - 1;
-
         public string ImageCounter => HasProductImages ? $"{_currentImageIndex + 1}/{_currentProductImages.Count}" : "";
 
         public bool IsProductChanged
@@ -203,6 +189,7 @@ namespace WpfShop.ViewModels
             }
         }
 
+        // Отслеживает изменения свойств товара для активации кнопки "Сохранить"
         private void SelectedProduct_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             IsProductChanged = true;
@@ -210,57 +197,48 @@ namespace WpfShop.ViewModels
 
         private void UpdateTagsFromString()
         {
-            if (_selectedProduct != null)
-            {
-                var newTags = SelectedProductTags
-                    .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                    .Select(tag => tag.Trim())
-                    .Where(tag => !string.IsNullOrEmpty(tag))
-                    .ToList();
+            if (_selectedProduct == null) return;
 
-                if (!newTags.SequenceEqual(_selectedProduct.tags ?? new List<string>()))
-                {
-                    _selectedProduct.tags = newTags;
-                    IsProductChanged = true;
-                }
+            var newTags = ParseCommaSeparatedList(SelectedProductTags);
+            if (!newTags.SequenceEqual(_selectedProduct.tags ?? Enumerable.Empty<string>()))
+            {
+                _selectedProduct.tags = newTags;
+                IsProductChanged = true;
             }
         }
 
         private void UpdateCategoriesFromString()
         {
-            if (_selectedProduct != null)
-            {
-                var newCategories = SelectedProductCategories
-                    .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                    .Select(cat => cat.Trim())
-                    .Where(cat => !string.IsNullOrEmpty(cat))
-                    .ToList();
+            if (_selectedProduct == null) return;
 
-                if (!newCategories.SequenceEqual(_selectedProduct.categories ?? new List<string>()))
-                {
-                    _selectedProduct.categories = newCategories;
-                    IsProductChanged = true;
-                }
+            var newCategories = ParseCommaSeparatedList(SelectedProductCategories);
+            if (!newCategories.SequenceEqual(_selectedProduct.categories ?? Enumerable.Empty<string>()))
+            {
+                _selectedProduct.categories = newCategories;
+                IsProductChanged = true;
             }
         }
 
         private void UpdateImageUrlsFromString()
         {
-            if (_selectedProduct != null)
-            {
-                var newImageUrls = SelectedProductImageUrls
-                    .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                    .Select(url => url.Trim())
-                    .Where(url => !string.IsNullOrEmpty(url))
-                    .ToList();
+            if (_selectedProduct == null) return;
 
-                if (!newImageUrls.SequenceEqual(_selectedProduct.imageUrls ?? new List<string>()))
-                {
-                    _selectedProduct.imageUrls = newImageUrls;
-                    IsProductChanged = true;
-                    UpdateProductImages();
-                }
+            var newImageUrls = ParseCommaSeparatedList(SelectedProductImageUrls);
+            if (!newImageUrls.SequenceEqual(_selectedProduct.imageUrls ?? Enumerable.Empty<string>()))
+            {
+                _selectedProduct.imageUrls = newImageUrls;
+                IsProductChanged = true;
+                UpdateProductImages();
             }
+        }
+
+        private List<string> ParseCommaSeparatedList(string input)
+        {
+            return input
+                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => s.Trim())
+                .Where(s => !string.IsNullOrEmpty(s))
+                .ToList();
         }
 
         private void UpdateProductImages()
@@ -279,127 +257,62 @@ namespace WpfShop.ViewModels
             OnPropertyChanged(nameof(ImageCounter));
         }
 
-        // Команда очистки поиска
-        private RelayCommand _clearSearchCommand;
-        public RelayCommand ClearSearchCommand
+        // Команды
+        public ICommand ClearSearchCommand => new RelayCommand(_ => SearchQuery = "");
+        public ICommand SaveProductCommand => new RelayCommand(_ => SaveProductChanges());
+        public ICommand PreviousImageCommand => new RelayCommand(_ =>
         {
-            get
+            if (CanGoToPreviousImage)
             {
-                return _clearSearchCommand ?? (_clearSearchCommand = new RelayCommand(obj =>
-                {
-                    SearchQuery = "";
-                }));
+                _currentImageIndex--;
+                UpdateImageProperties();
             }
-        }
-
-        // Команда сохранения товара
-        private RelayCommand _saveProductCommand;
-        public RelayCommand SaveProductCommand
+        });
+        public ICommand NextImageCommand => new RelayCommand(_ =>
         {
-            get
+            if (CanGoToNextImage)
             {
-                return _saveProductCommand ?? (_saveProductCommand = new RelayCommand(obj =>
-                {
-                    SaveProductChanges();
-                }));
+                _currentImageIndex++;
+                UpdateImageProperties();
             }
-        }
-
-        // Команда для предыдущего изображения
-        private RelayCommand _previousImageCommand;
-        public RelayCommand PreviousImageCommand
-        {
-            get
-            {
-                return _previousImageCommand ?? (_previousImageCommand = new RelayCommand(obj =>
-                {
-                    if (CanGoToPreviousImage)
-                    {
-                        _currentImageIndex--;
-                        UpdateImageProperties();
-                    }
-                }));
-            }
-        }
-
-        // Команда для следующего изображения
-        private RelayCommand _nextImageCommand;
-        public RelayCommand NextImageCommand
-        {
-            get
-            {
-                return _nextImageCommand ?? (_nextImageCommand = new RelayCommand(obj =>
-                {
-                    if (CanGoToNextImage)
-                    {
-                        _currentImageIndex++;
-                        UpdateImageProperties();
-                    }
-                }));
-            }
-        }
-
-        // Команда для добавления нового товара
-        private RelayCommand _addNewProductCommand;
-        public RelayCommand AddNewProductCommand
-        {
-            get
-            {
-                return _addNewProductCommand ?? (_addNewProductCommand = new RelayCommand(obj =>
-                {
-                    AddNewProduct();
-                }));
-            }
-        }
-
-        // Команда для удаления товара
-        private RelayCommand _deleteProductCommand;
-        public RelayCommand DeleteProductCommand
-        {
-            get
-            {
-                return _deleteProductCommand ?? (_deleteProductCommand = new RelayCommand(obj =>
-                {
-                    DeleteProduct();
-                }, obj => SelectedProduct != null)); // Можно удалять только если есть выбранный товар
-            }
-        }
+        });
+        public ICommand AddNewProductCommand => new RelayCommand(_ => AddNewProduct());
+        public ICommand DeleteProductCommand => new RelayCommand(
+            _ => DeleteProduct(),
+            _ => SelectedProduct != null
+        );
 
         private void SaveProductChanges()
         {
-            if (SelectedProduct != null && IsProductChanged)
+            if (SelectedProduct == null || !IsProductChanged) return;
+
+            try
             {
-                try
+                int currentProductId = SelectedProduct.id;
+
+                // Синхронизируем данные из текстовых полей
+                UpdateTagsFromString();
+                UpdateCategoriesFromString();
+                UpdateImageUrlsFromString();
+
+                var result = _adminCatalogService.update(SelectedProduct);
+                if (result.ok)
                 {
-                    // Сохраняем ID перед сохранением
-                    int currentProductId = SelectedProduct.id;
-
-                    // Обновляем теги и категории из строк перед сохранением
-                    UpdateTagsFromString();
-                    UpdateCategoriesFromString();
-                    UpdateImageUrlsFromString();
-
-                    var result = _adminCatalogService.update(SelectedProduct);
-                    if (result.ok)
-                    {
-                        SaveStatus = "✅ Изменения сохранены";
-                        SaveStatusColor = Brushes.Green;
-                        IsProductChanged = false;
-
-                        // Обновляем список продуктов и восстанавливаем выделение
-                        LoadProductsAndRestoreSelection(currentProductId);
-                    }
-                    else
-                    {
-                        SaveStatus = $"❌ Ошибка: {result.error}";
-                        SaveStatusColor = Brushes.Red;
-                    }
+                    SaveStatus = "✅ Изменения сохранены";
+                    SaveStatusColor = Brushes.Green;
+                    IsProductChanged = false;
+                    LoadProductsAndRestoreSelection(currentProductId);
                 }
-                catch (Exception ex)
+                else
                 {
-                    SaveStatus = $"❌ Ошибка: {ex.Message}";
+                    SaveStatus = $"❌ Ошибка: {result.error}";
                     SaveStatusColor = Brushes.Red;
                 }
+            }
+            catch (Exception ex)
+            {
+                SaveStatus = $"❌ Ошибка: {ex.Message}";
+                SaveStatusColor = Brushes.Red;
             }
         }
 
@@ -407,10 +320,8 @@ namespace WpfShop.ViewModels
         {
             try
             {
-                // Создаем новый товар с базовыми значениями
                 var newProduct = new Product
                 {
-                    id = 0, // 0 - признак нового товара
                     title = "Новый товар",
                     description = "Описание товара",
                     price = 0,
@@ -420,13 +331,8 @@ namespace WpfShop.ViewModels
                     imageUrls = new List<string>()
                 };
 
-                // Используем AdminCatalogService для создания товара
                 var createdProduct = _adminCatalogService.create(newProduct);
-
-                // Обновляем список товаров
                 LoadProducts();
-
-                // Выбираем созданный товар
                 SelectedProduct = Products.FirstOrDefault(p => p.id == createdProduct.id);
 
                 SaveStatus = "✅ Новый товар создан";
@@ -441,8 +347,7 @@ namespace WpfShop.ViewModels
 
         private void DeleteProduct()
         {
-            if (SelectedProduct == null)
-                return;
+            if (SelectedProduct == null) return;
 
             var result = MessageBox.Show(
                 $"Вы уверены, что хотите удалить товар \"{SelectedProduct.title}\"?",
@@ -450,71 +355,56 @@ namespace WpfShop.ViewModels
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Warning);
 
-            if (result == MessageBoxResult.Yes)
-            {
-                try
-                {
-                    var deleteResult = _adminCatalogService.delete(SelectedProduct.id);
-                    if (deleteResult.ok)
-                    {
-                        SaveStatus = "✅ Товар удален";
-                        SaveStatusColor = Brushes.Green;
+            if (result != MessageBoxResult.Yes) return;
 
-                        // Обновляем список товаров
-                        LoadProducts();
-                    }
-                    else
-                    {
-                        SaveStatus = $"❌ Ошибка при удалении: {deleteResult.error}";
-                        SaveStatusColor = Brushes.Red;
-                    }
-                }
-                catch (Exception ex)
+            try
+            {
+                var deleteResult = _adminCatalogService.delete(SelectedProduct.id);
+                if (deleteResult.ok)
                 {
-                    SaveStatus = $"❌ Ошибка при удалении: {ex.Message}";
+                    SaveStatus = "✅ Товар удален";
+                    SaveStatusColor = Brushes.Green;
+                    LoadProducts();
+                }
+                else
+                {
+                    SaveStatus = $"❌ Ошибка при удалении: {deleteResult.error}";
                     SaveStatusColor = Brushes.Red;
                 }
             }
+            catch (Exception ex)
+            {
+                SaveStatus = $"❌ Ошибка при удалении: {ex.Message}";
+                SaveStatusColor = Brushes.Red;
+            }
         }
 
+        // Загружает товары и восстанавливает выделение по ID
         private void LoadProductsAndRestoreSelection(int productIdToSelect = 0)
         {
             var allProducts = _catalogService.getAll();
 
-            // Загружаем все товары
             Products.Clear();
             foreach (var product in allProducts)
-            {
                 Products.Add(product);
-            }
 
-            // Извлекаем уникальные категории
+            // Обновляем список категорий
             Categories.Clear();
-            var allCategories = allProducts
-                .SelectMany(p => p.categories)
+            Categories.Add("Все товары");
+            var uniqueCategories = allProducts
+                .SelectMany(p => p.categories ?? Enumerable.Empty<string>())
                 .Where(c => !string.IsNullOrEmpty(c))
                 .Distinct()
-                .OrderBy(c => c)
-                .ToList();
-
-            Categories.Add("Все товары");
-            foreach (var category in allCategories)
-            {
+                .OrderBy(c => c);
+            foreach (var category in uniqueCategories)
                 Categories.Add(category);
-            }
 
             // Восстанавливаем выделение
             if (productIdToSelect > 0)
             {
-                var productToSelect = allProducts.FirstOrDefault(p => p.id == productIdToSelect);
-                if (productToSelect != null)
-                {
-                    SelectedProduct = productToSelect;
-                }
-                else
-                {
+                SelectedProduct = Products.FirstOrDefault(p => p.id == productIdToSelect);
+                if (SelectedProduct == null)
                     SelectedCategory = "Все товары";
-                }
             }
             else
             {
@@ -533,24 +423,22 @@ namespace WpfShop.ViewModels
             _productsViewSource.Filter += OnProductsFilter;
         }
 
+        // Фильтрация товаров по категории и поисковому запросу
         private void OnProductsFilter(object sender, FilterEventArgs e)
         {
-            var product = e.Item as Product;
-            if (product == null)
+            if (e.Item is not Product product)
             {
                 e.Accepted = false;
                 return;
             }
 
-            // Фильтрация по категории
             bool categoryMatch = SelectedCategory == "Все товары" ||
-                               product.categories.Contains(SelectedCategory);
+                                 (product.categories?.Contains(SelectedCategory) == true);
 
-            // Фильтрация по поисковому запросу
             bool searchMatch = string.IsNullOrWhiteSpace(SearchQuery) ||
-                             product.title.ToLower().Contains(SearchQuery.ToLower()) ||
-                             (product.description ?? "").ToLower().Contains(SearchQuery.ToLower()) ||
-                             product.tags.Any(tag => tag.ToLower().Contains(SearchQuery.ToLower()));
+                               product.title.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ||
+                               (product.description?.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) == true) ||
+                               (product.tags?.Any(tag => tag.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase)) == true);
 
             e.Accepted = categoryMatch && searchMatch;
         }
@@ -560,14 +448,7 @@ namespace WpfShop.ViewModels
             _productsViewSource?.View?.Refresh();
 
             // Автоматически выбираем первый товар после фильтрации
-            if (FilteredProducts != null && FilteredProducts.Cast<Product>().Any())
-            {
-                SelectedProduct = FilteredProducts.Cast<Product>().First();
-            }
-            else
-            {
-                SelectedProduct = null;
-            }
+            SelectedProduct = FilteredProducts?.Cast<Product>().FirstOrDefault();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -589,13 +470,12 @@ namespace WpfShop.ViewModels
         }
 
         public bool CanExecute(object parameter) => _canExecute == null || _canExecute(parameter);
-
         public void Execute(object parameter) => _execute(parameter);
 
         public event EventHandler CanExecuteChanged
         {
-            add { CommandManager.RequerySuggested += value; }
-            remove { CommandManager.RequerySuggested -= value; }
+            add => CommandManager.RequerySuggested += value;
+            remove => CommandManager.RequerySuggested -= value;
         }
     }
 }
