@@ -340,9 +340,10 @@ namespace WpfShop.ViewModels
             {
                 try
                 {
+                    // Обновляем теги и категории из строк перед сохранением
                     UpdateTagsFromString();
                     UpdateCategoriesFromString();
-                    UpdateImageUrlsFromString(); 
+                    UpdateImageUrlsFromString();
 
                     var result = _adminCatalogService.update(SelectedProduct);
                     if (result.ok)
@@ -351,8 +352,11 @@ namespace WpfShop.ViewModels
                         SaveStatusColor = Brushes.Green;
                         IsProductChanged = false;
 
-                        // Обновляем список продуктов
-                        LoadProducts();
+                        // НЕ перезагружаем список - товар уже обновлен в памяти
+                        // LoadProducts(); // Закомментировать эту строку
+
+                        // Просто обновляем привязки
+                        OnPropertyChanged(nameof(SelectedProduct));
                     }
                     else
                     {
