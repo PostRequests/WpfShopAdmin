@@ -64,9 +64,9 @@ namespace WpfShop.ViewModels
                 if (_selectedProduct != null)
                 {
                     _selectedProduct.PropertyChanged += SelectedProduct_PropertyChanged;
-                    SelectedProductTags = string.Join(", ", _selectedProduct.tags ?? new List<string>());
-                    SelectedProductCategories = string.Join(", ", _selectedProduct.categories ?? new List<string>());
-                    SelectedProductImageUrls = string.Join(", ", _selectedProduct.imageUrls ?? new List<string>());
+                    SelectedProductTags = string.Join("; ", _selectedProduct.tags ?? new List<string>());
+                    SelectedProductCategories = string.Join("; ", _selectedProduct.categories ?? new List<string>());
+                    SelectedProductImageUrls = string.Join("; ", _selectedProduct.imageUrls ?? new List<string>());
                     UpdateProductImages();
                 }
                 else
@@ -213,7 +213,7 @@ namespace WpfShop.ViewModels
             if (_selectedProduct != null)
             {
                 var newTags = SelectedProductTags
-                    .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
                     .Select(tag => tag.Trim())
                     .Where(tag => !string.IsNullOrEmpty(tag))
                     .ToList();
@@ -231,7 +231,7 @@ namespace WpfShop.ViewModels
             if (_selectedProduct != null)
             {
                 var newCategories = SelectedProductCategories
-                    .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
                     .Select(cat => cat.Trim())
                     .Where(cat => !string.IsNullOrEmpty(cat))
                     .ToList();
@@ -249,7 +249,7 @@ namespace WpfShop.ViewModels
             if (_selectedProduct != null)
             {
                 var newImageUrls = SelectedProductImageUrls
-                    .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
                     .Select(url => url.Trim())
                     .Where(url => !string.IsNullOrEmpty(url))
                     .ToList();

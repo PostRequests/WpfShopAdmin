@@ -6,147 +6,65 @@
         WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
-        <!-- Цветовая схема -->
-        <Color x:Key="PrimaryOrange">#FF9800</Color>
-        <Color x:Key="DarkOrange">#F57C00</Color>
-        <Color x:Key="LightOrange">#FFE0B2</Color>
-        <Color x:Key="BackgroundColor">#FAFAFA</Color>
-        <Color x:Key="BorderColor">#E0E0E0</Color>
-
-        <SolidColorBrush x:Key="PrimaryOrangeBrush" Color="{StaticResource PrimaryOrange}"/>
-        <SolidColorBrush x:Key="DarkOrangeBrush" Color="{StaticResource DarkOrange}"/>
-        <SolidColorBrush x:Key="LightOrangeBrush" Color="{StaticResource LightOrange}"/>
-        <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
-        <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
-
-        <!-- Стиль для кнопки выхода -->
-        <Style x:Key="ExitButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="White"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="10,5"/>
-            <Setter Property="Cursor" Value="Hand"/>
-        </Style>
-
-        <!-- Стиль для оранжевых кнопок -->
-        <Style x:Key="OrangeButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="{StaticResource PrimaryOrangeBrush}"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Padding" Value="20,10"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="{StaticResource DarkOrangeBrush}"/>
-                </Trigger>
-                <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Background" Value="{StaticResource DarkOrangeBrush}"/>
-                </Trigger>
-                <Trigger Property="IsEnabled" Value="False">
-                    <Setter Property="Background" Value="{StaticResource LightOrangeBrush}"/>
-                    <Setter Property="Foreground" Value="White"/>
-                    <Setter Property="Opacity" Value="0.6"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
-        <!-- Стиль для списка категорий -->
         <Style x:Key="CategoryListBoxItemStyle" TargetType="ListBoxItem">
             <Setter Property="Padding" Value="10,8"/>
             <Setter Property="Margin" Value="2"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="{StaticResource PrimaryOrangeBrush}"/>
+                    <Setter Property="Background" Value="#FF9800"/>
                     <Setter Property="Foreground" Value="White"/>
                     <Setter Property="FontWeight" Value="Bold"/>
                 </Trigger>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="{StaticResource LightOrangeBrush}"/>
+                    <Setter Property="Background" Value="#FFE0B2"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
 
-        <!-- Стиль для списка товаров -->
         <Style x:Key="ProductListBoxItemStyle" TargetType="ListBoxItem">
             <Setter Property="Padding" Value="8"/>
             <Setter Property="Margin" Value="0,2"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderBrush" Value="#E0E0E0"/>
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="{StaticResource LightOrangeBrush}"/>
-                    <Setter Property="BorderBrush" Value="{StaticResource PrimaryOrangeBrush}"/>
+                    <Setter Property="Background" Value="#FFE0B2"/>
+                    <Setter Property="BorderBrush" Value="#FF9800"/>
                 </Trigger>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="{StaticResource LightOrangeBrush}"/>
+                    <Setter Property="Background" Value="#FFE0B2"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
 
-        <!-- DataTemplate для товара в списке -->
         <DataTemplate x:Key="ProductItemTemplate">
             <StackPanel>
-                <TextBlock Text="{Binding title}" 
-                           FontWeight="SemiBold" 
-                           TextWrapping="Wrap"
-                           Margin="0,0,0,4"/>
-                <TextBlock Text="{Binding price, StringFormat='Цена: {0} ₽'}" 
-                           Foreground="{StaticResource PrimaryOrangeBrush}"
-                           FontWeight="Bold"/>
-                <TextBlock Text="{Binding stock, StringFormat='В наличии: {0} шт.'}" 
-                           FontSize="11"
-                           Foreground="Gray"/>
+                <TextBlock Text="{Binding title}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                <TextBlock Text="{Binding price, StringFormat='Цена: {0} ₽'}" Foreground="#FF9800" FontWeight="Bold"/>
+                <TextBlock Text="{Binding stock, StringFormat='В наличии: {0} шт.'}" FontSize="11" Foreground="Gray"/>
             </StackPanel>
         </DataTemplate>
-
-        <!-- Стиль для текстовых полей -->
-        <Style x:Key="EditTextBoxStyle" TargetType="TextBox">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="Foreground" Value="#333333"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="5"/>
-            <Setter Property="FontSize" Value="13"/>
-        </Style>
     </Window.Resources>
 
-    <Grid Background="{StaticResource BackgroundBrush}">
+    <Grid Background="#FAFAFA">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Шапка -->
-        <Border Background="{StaticResource PrimaryOrangeBrush}" Grid.Row="0">
+        <Border Background="#FF9800" Grid.Row="0">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-
-                <TextBlock Text="Каталог запчастей" 
-                           FontSize="20" 
-                           FontWeight="Bold" 
-                           Foreground="White"
-                           VerticalAlignment="Center"
-                           Margin="20,10"/>
-
-                <Button Grid.Column="2"
-                        Content="Выйти" 
-                        Style="{StaticResource ExitButtonStyle}"
-                        Margin="0,0,20,0"
-                        Click="LogoutButton_Click"/>
-               
+                <TextBlock Text="Каталог запчастей" FontSize="20" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" Margin="20,10"/>
+                <Button Grid.Column="1" Content="Выйти" Background="Transparent" Foreground="White" BorderBrush="White" BorderThickness="1" Padding="10,5" Cursor="Hand" Margin="0,0,20,0" Click="LogoutButton_Click"/>
             </Grid>
         </Border>
 
-        <!-- Основное содержимое -->
         <Grid Grid.Row="1" Margin="10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="250"/>
@@ -154,33 +72,14 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Левая панель - Категории -->
-            <Border Grid.Column="0" 
-                    Background="White" 
-                    BorderBrush="{StaticResource BorderBrush}" 
-                    BorderThickness="1"
-                    Margin="0,0,5,0">
+            <Border Grid.Column="0" Background="White" BorderBrush="#E0E0E0" BorderThickness="1" Margin="0,0,5,0">
                 <StackPanel>
-                    <TextBlock Text="Категории" 
-                               FontSize="16" 
-                               FontWeight="Bold"
-                               Margin="10,10,10,5"/>
-                   
-
-                    <ListBox ItemsSource="{Binding Categories}"
-                             SelectedItem="{Binding SelectedCategory}"
-                             ItemContainerStyle="{StaticResource CategoryListBoxItemStyle}"
-                             BorderThickness="0"
-                             Background="Transparent"/>
+                    <TextBlock Text="Категории" FontSize="16" FontWeight="Bold" Margin="10,10,10,5"/>
+                    <ListBox ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" ItemContainerStyle="{StaticResource CategoryListBoxItemStyle}" BorderThickness="0" Background="Transparent"/>
                 </StackPanel>
             </Border>
 
-            <!-- Центральная панель - Список товаров -->
-            <Border Grid.Column="1" 
-                    Background="White" 
-                    BorderBrush="{StaticResource BorderBrush}" 
-                    BorderThickness="1"
-                    Margin="5,0,5,0">
+            <Border Grid.Column="1" Background="White" BorderBrush="#E0E0E0" BorderThickness="1" Margin="5,0,5,0">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -188,422 +87,62 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-
-                    <TextBlock Text="Товары" 
-                               FontSize="16" 
-                               FontWeight="Bold"
-                               Margin="10,10,10,5"
-                               Grid.Row="0"/>
-
-                    <TextBlock Text="{Binding SelectedCategory, StringFormat='Категория: {0}'}"
-                               FontSize="12"
-                               Foreground="Gray"
-                               Margin="10,0,10,5"
-                               Grid.Row="1"/>
-
-                    <!-- Строка поиска -->
-                    <StackPanel Grid.Row="2" 
-                                Orientation="Horizontal" 
-                                Margin="10,5,10,10"
-                                VerticalAlignment="Center">
-                        <TextBlock Text="Поиск:" 
-                                   FontSize="12"
-                                   Foreground="Gray"
-                                   VerticalAlignment="Center"
-                                   Margin="0,0,5,0"/>
-
-                        <TextBox x:Name="SearchTextBox"
-                                 Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                                 Width="150"
-                                 Height="25"
-                                 Padding="5,2"
-                                 FontSize="12">
-                            <TextBox.Style>
-                                <Style TargetType="TextBox">
-                                    <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
-                                    <Setter Property="BorderThickness" Value="1"/>
-                                    <Setter Property="Background" Value="White"/>
-                                    <Style.Triggers>
-                                        <Trigger Property="IsFocused" Value="True">
-                                            <Setter Property="BorderBrush" Value="{StaticResource PrimaryOrangeBrush}"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBox.Style>
-                        </TextBox>
-
-                        <!-- Кнопка очистки поиска -->
-                        <Button Content="✕"
-                                Width="25"
-                                Height="25"
-                                Margin="5,0,0,0"
-                                Background="Transparent"
-                                BorderBrush="{StaticResource BorderBrush}"
-                                BorderThickness="1"
-                                FontSize="10"
-                                Command="{Binding ClearSearchCommand}">
-                            <Button.Style>
-                                <Style TargetType="Button">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding SearchQuery}" Value="">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
-                        </Button>
+                    <TextBlock Text="Товары" FontSize="16" FontWeight="Bold" Margin="10,10,10,5" Grid.Row="0"/>
+                    <TextBlock Text="{Binding SelectedCategory, StringFormat='Категория: {0}'}" FontSize="12" Foreground="Gray" Margin="10,0,10,5" Grid.Row="1"/>
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="10,5,10,10" VerticalAlignment="Center">
+                        <TextBlock Text="Поиск:" FontSize="12" Foreground="Gray" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                        <TextBox x:Name="SearchTextBox" Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" Width="150" Height="25" Padding="5,2" FontSize="12" BorderBrush="#E0E0E0" BorderThickness="1" Background="White"/>
+                        <Button Content="✕" Width="25" Height="25" Margin="5,0,0,0" Background="Transparent" BorderBrush="#E0E0E0" BorderThickness="1" FontSize="10" Command="{Binding ClearSearchCommand}"/>
                     </StackPanel>
-
-                    <!-- ListBox занимает все оставшееся пространство со скроллом -->
-                    <ListBox ItemsSource="{Binding FilteredProducts}"
-                             SelectedItem="{Binding SelectedProduct}"
-                             ItemContainerStyle="{StaticResource ProductListBoxItemStyle}"
-                             ItemTemplate="{StaticResource ProductItemTemplate}"
-                             BorderThickness="0"
-                             Grid.Row="3"
-                             ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                    <ListBox ItemsSource="{Binding FilteredProducts}" SelectedItem="{Binding SelectedProduct}" ItemContainerStyle="{StaticResource ProductListBoxItemStyle}" ItemTemplate="{StaticResource ProductItemTemplate}" BorderThickness="0" Grid.Row="3" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
                 </Grid>
             </Border>
-            
-            <!-- Правая панель - Детали товара -->
-            <Border Grid.Column="2" 
-        Background="White" 
-        BorderBrush="{StaticResource BorderBrush}" 
-        BorderThickness="1"
-        Margin="5,0,0,0">
+
+            <Border Grid.Column="2" Background="White" BorderBrush="#E0E0E0" BorderThickness="1" Margin="5,0,0,0">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="15">
- 
-
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <!-- Кнопка добавления нового товара -->
-                            <Button Content="➕ Добавить новый товар" Grid.Column="0"
-         Command="{Binding AddNewProductCommand}"
-         Background="Transparent"
-         Foreground="{StaticResource PrimaryOrangeBrush}"
-         FontWeight="SemiBold"
-         HorizontalAlignment="Stretch"
-         Margin="0,10,0,0"
-         Height="35"
-         FontSize="14"
-         BorderThickness="1"
-         BorderBrush="{StaticResource PrimaryOrangeBrush}"
-         Cursor="Hand">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="Foreground" Value="{StaticResource PrimaryOrangeBrush}"/>
-                                        <Setter Property="BorderBrush" Value="{StaticResource PrimaryOrangeBrush}"/>
-                                        <Style.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="{StaticResource LightOrangeBrush}"/>
-                                                <Setter Property="Foreground" Value="White"/>
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
-                            <!-- Кнопка удаления товара -->
-                            <Button Content="🗑️ Удалить товар"  Grid.Column="1"
-Command="{Binding DeleteProductCommand}"
-Background="Transparent"
-Foreground="Red"
-FontWeight="SemiBold"
-HorizontalAlignment="Stretch"
-Margin="0,10,0,0"
-Height="35"
-FontSize="12"
-BorderThickness="1"
-BorderBrush="Red"
-Cursor="Hand">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="Foreground" Value="Red"/>
-                                        <Setter Property="BorderBrush" Value="Red"/>
-                                        <Style.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="Red"/>
-                                                <Setter Property="Foreground" Value="White"/>
-                                            </Trigger>
-                                            <DataTrigger Binding="{Binding SelectedProduct}" Value="{x:Null}">
-                                                <Setter Property="IsEnabled" Value="False"/>
-                                                <Setter Property="Opacity" Value="0.6"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
-
+                            <Button Content="➕ Добавить новый товар" Grid.Column="0" Command="{Binding AddNewProductCommand}" Background="Transparent" Foreground="#FF9800" FontWeight="SemiBold" HorizontalAlignment="Stretch" Margin="0,10,0,0" Height="35" FontSize="14" BorderThickness="1" BorderBrush="#FF9800" Cursor="Hand"/>
+                            <Button Content="🗑️ Удалить товар" Grid.Column="1" Command="{Binding DeleteProductCommand}" Background="Transparent" Foreground="Red" FontWeight="SemiBold" HorizontalAlignment="Stretch" Margin="0,10,0,0" Height="35" FontSize="12" BorderThickness="1" BorderBrush="Red" Cursor="Hand"/>
                         </Grid>
-                       
-                        <!-- Изображение товара -->
-                        <Border BorderBrush="{StaticResource BorderBrush}" 
-        BorderThickness="1" 
-        Background="#F8F8F8"
-        Height="200"
-        Margin="0,0,0,15">
+
+                        <Border BorderBrush="#E0E0E0" BorderThickness="1" Background="#F8F8F8" Height="200" Margin="0,0,0,15">
                             <Grid>
-                                <!-- Контейнер для изображения -->
-                                <Image x:Name="ProductImage"
-               Source="{Binding CurrentProductImage}"
-               Stretch="Uniform"
-               HorizontalAlignment="Center"
-               VerticalAlignment="Center"
-               MaxWidth="180"
-               MaxHeight="180">
-                                    <Image.Style>
-                                        <Style TargetType="Image">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding CurrentProductImage}" Value="{x:Null}">
-                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Image.Style>
-                                </Image>
-
-                                <!-- Заглушка, когда нет изображений -->
-                                <TextBlock Text="Нет изображения" 
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"
-                   Foreground="Gray"
-                   FontSize="12">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding HasProductImages}" Value="True">
-                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-
-                                <!-- Кнопка предыдущего изображения -->
-                                <Button Content="◀"
-                Command="{Binding PreviousImageCommand}"
-                Width="30"
-                Height="30"
-                Background="{StaticResource PrimaryOrangeBrush}"
-                Foreground="White"
-                BorderThickness="0"
-                FontSize="10"
-                FontWeight="Bold"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Center"
-                Margin="5,0,0,0"
-                Cursor="Hand">
-                                    <Button.Style>
-                                        <Style TargetType="Button">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding HasProductImages}" Value="False">
-                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding CanGoToPreviousImage}" Value="False">
-                                                    <Setter Property="IsEnabled" Value="False"/>
-                                                    <Setter Property="Opacity" Value="0.5"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Button.Style>
-                                </Button>
-
-                                <!-- Кнопка следующего изображения -->
-                                <Button Content="▶"
-                Command="{Binding NextImageCommand}"
-                Width="30"
-                Height="30"
-                Background="{StaticResource PrimaryOrangeBrush}"
-                Foreground="White"
-                BorderThickness="0"
-                FontSize="10"
-                FontWeight="Bold"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Center"
-                Margin="0,0,5,0"
-                Cursor="Hand">
-                                    <Button.Style>
-                                        <Style TargetType="Button">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding HasProductImages}" Value="False">
-                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding CanGoToNextImage}" Value="False">
-                                                    <Setter Property="IsEnabled" Value="False"/>
-                                                    <Setter Property="Opacity" Value="0.5"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Button.Style>
-                                </Button>
-
-                                <!-- Счетчик изображений -->
-                                <TextBlock Text="{Binding ImageCounter}"
-                   Background="#CC000000"
-                   Foreground="White"
-                   FontSize="10"
-                   Padding="5,2"
-                   HorizontalAlignment="Right"
-                   VerticalAlignment="Bottom"
-                   Margin="0,0,5,5">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding HasProductImages}" Value="False">
-                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
+                                <Image x:Name="ProductImage" Source="{Binding CurrentProductImage}" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="180" MaxHeight="180"/>
+                                <!--<TextBlock Text="Нет изображения" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="Gray" FontSize="12"/>-->
+                                <Button Content="◀" Command="{Binding PreviousImageCommand}" Width="30" Height="30" Background="#FF9800" Foreground="White" BorderThickness="0" FontSize="10" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0" Cursor="Hand"/>
+                                <Button Content="▶" Command="{Binding NextImageCommand}" Width="30" Height="30" Background="#FF9800" Foreground="White" BorderThickness="0" FontSize="10" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0" Cursor="Hand"/>
+                                <TextBlock Text="{Binding ImageCounter}" Background="#CC000000" Foreground="White" FontSize="10" Padding="5,2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,5,5"/>
                             </Grid>
                         </Border>
 
-                        <!-- Ссылки на изображения -->
-                        <TextBlock Text="Ссылки на изображения:" 
-           FontWeight="SemiBold"
-           Foreground="Gray"
-           Margin="0,0,0,5"/>
-                        <TextBox Text="{Binding SelectedProductImageUrls, UpdateSourceTrigger=PropertyChanged}" 
-         Margin="0,0,0,15"
-         AcceptsReturn="True"
-         MinHeight="40"
-         ToolTip="Ссылки на изображения через запятую. Изменения сохраняются автоматически."
-         FontSize="11">
-                            <TextBox.Style>
-                                <Style TargetType="TextBox" BasedOn="{StaticResource EditTextBoxStyle}">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding SelectedProduct}" Value="{x:Null}">
-                                            <Setter Property="IsEnabled" Value="False"/>
-                                            <Setter Property="Opacity" Value="0.6"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBox.Style>
-                        </TextBox>
+                        <TextBlock Text="Ссылки на изображения:" FontWeight="SemiBold" Foreground="Gray" Margin="0,0,0,5"/>
+                        <TextBox Text="{Binding SelectedProductImageUrls, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,15" AcceptsReturn="True" MinHeight="40" ToolTip="Ссылки на изображения через запятую. Изменения сохраняются автоматически." FontSize="11" Background="White" Foreground="#333333" BorderBrush="#E0E0E0" BorderThickness="1" Padding="5"/>
 
-                        <!-- Название -->
-                        <TextBlock Text="Название:" 
-                       FontWeight="SemiBold"
-                       Foreground="Gray"
-                       Margin="0,0,0,5"/>
-                        <TextBox Text="{Binding SelectedProduct.title, UpdateSourceTrigger=PropertyChanged}" 
-                     Style="{StaticResource EditTextBoxStyle}"
-                     FontSize="18" 
-                     FontWeight="Bold"
-                     TextWrapping="Wrap"
-                     Margin="0,0,0,10"/>
+                        <TextBlock Text="Название:" FontWeight="SemiBold" Foreground="Gray" Margin="0,0,0,5"/>
+                        <TextBox Text="{Binding SelectedProduct.title, UpdateSourceTrigger=PropertyChanged}" Background="White" Foreground="#333333" BorderBrush="#E0E0E0" BorderThickness="1" Padding="5" FontSize="18" FontWeight="Bold" TextWrapping="Wrap" Margin="0,0,0,10"/>
 
-                        <!-- Теги -->
-                        <TextBlock Text="Теги:" 
-                       FontWeight="SemiBold"
-                       Foreground="Gray"
-                       Margin="0,0,0,5"/>
-                        <TextBox Text="{Binding SelectedProductTags, UpdateSourceTrigger=PropertyChanged}" 
-                     Style="{StaticResource EditTextBoxStyle}"
-                     Margin="0,0,0,10"
-                     ToolTip="Теги через запятую"/>
+                        <TextBlock Text="Теги:" FontWeight="SemiBold" Foreground="Gray" Margin="0,0,0,5"/>
+                        <TextBox Text="{Binding SelectedProductTags, UpdateSourceTrigger=PropertyChanged}" Background="White" Foreground="#333333" BorderBrush="#E0E0E0" BorderThickness="1" Padding="5" FontSize="13" Margin="0,0,0,10" ToolTip="Теги через запятую"/>
 
-                        <!-- Описание -->
-                        <TextBlock Text="Описание:" 
-                       FontWeight="SemiBold"
-                       Foreground="Gray"
-                       Margin="0,0,0,5"/>
-                        <TextBox Text="{Binding SelectedProduct.description, UpdateSourceTrigger=PropertyChanged}" 
-                     Style="{StaticResource EditTextBoxStyle}"
-                     TextWrapping="Wrap"
-                     Margin="0,0,0,15"
-                     AcceptsReturn="True"
-                     MinHeight="60"/>
+                        <TextBlock Text="Описание:" FontWeight="SemiBold" Foreground="Gray" Margin="0,0,0,5"/>
+                        <TextBox Text="{Binding SelectedProduct.description, UpdateSourceTrigger=PropertyChanged}" Background="White" Foreground="#333333" BorderBrush="#E0E0E0" BorderThickness="1" Padding="5" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,15" AcceptsReturn="True" MinHeight="60"/>
 
-                        <!-- Наличие -->
-                        <TextBlock Text="Количество на складе:" 
-                       FontWeight="SemiBold"
-                       Foreground="Gray"
-                       Margin="0,0,0,5"/>
-                        <TextBox Text="{Binding SelectedProduct.stock, UpdateSourceTrigger=PropertyChanged}" 
-                     Style="{StaticResource EditTextBoxStyle}"
-                     FontWeight="SemiBold"
-                     HorizontalAlignment="Left"
-                     Margin="0,0,0,10"
-                     Width="80"/>
+                        <TextBlock Text="Количество на складе:" FontWeight="SemiBold" Foreground="Gray" Margin="0,0,0,5"/>
+                        <TextBox Text="{Binding SelectedProduct.stock, UpdateSourceTrigger=PropertyChanged}" Background="White" Foreground="#333333" BorderBrush="#E0E0E0" BorderThickness="1" Padding="5" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Left" Margin="0,0,0,10" Width="80"/>
 
-                        <!-- Цена -->
-                        <TextBlock Text="Цена:" 
-                       FontWeight="SemiBold"
-                       Foreground="Gray"
-                       Margin="0,0,0,5"/>
-                        <TextBox Text="{Binding SelectedProduct.price, UpdateSourceTrigger=PropertyChanged}" 
-                     Style="{StaticResource EditTextBoxStyle}"
-                     FontSize="20" 
-                     FontWeight="Bold"
-                     Foreground="{StaticResource PrimaryOrangeBrush}"
-                     HorizontalAlignment="Left"
-                     Margin="0,0,0,15"
-                     Width="120"/>
+                        <TextBlock Text="Цена:" FontWeight="SemiBold" Foreground="Gray" Margin="0,0,0,5"/>
+                        <TextBox Text="{Binding SelectedProduct.price, UpdateSourceTrigger=PropertyChanged}" Background="White" Foreground="#FF9800" BorderBrush="#E0E0E0" BorderThickness="1" Padding="5" FontSize="20" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,0,15" Width="120"/>
 
-                        <!-- Категории -->
-                        <TextBlock Text="Категории:" 
-                       FontWeight="SemiBold"
-                       Foreground="Gray"
-                       Margin="0,0,0,5"/>
-                        <TextBox Text="{Binding SelectedProductCategories, UpdateSourceTrigger=PropertyChanged}" 
-                     Style="{StaticResource EditTextBoxStyle}"
-                     Margin="0,0,0,15"
-                     AcceptsReturn="True"
-                     MinHeight="40"
-                     ToolTip="Категории через запятую"/>
+                        <TextBlock Text="Категории:" FontWeight="SemiBold" Foreground="Gray" Margin="0,0,0,5"/>
+                        <TextBox Text="{Binding SelectedProductCategories, UpdateSourceTrigger=PropertyChanged}" Background="White" Foreground="#333333" BorderBrush="#E0E0E0" BorderThickness="1" Padding="5" FontSize="13" Margin="0,0,0,15" AcceptsReturn="True" MinHeight="40" ToolTip="Категории через запятую"/>
 
-                        <!-- Кнопка сохранения -->
-                        <Button Content="Сохранить изменения" 
-                    Command="{Binding SaveProductCommand}"
-                    Background="{StaticResource PrimaryOrangeBrush}"
-                    Foreground="White"
-                    FontWeight="SemiBold"
-                    HorizontalAlignment="Stretch"
-                    Margin="0,10,0,0"
-                    Height="35"
-                    FontSize="14"
-                    BorderThickness="0"
-                    Cursor="Hand">
-                            <Button.Style>
-                                <Style TargetType="Button">
-                                    <Setter Property="Background" Value="{StaticResource PrimaryOrangeBrush}"/>
-                                    <Setter Property="Foreground" Value="White"/>
-                                    <Setter Property="FontWeight" Value="SemiBold"/>
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="{StaticResource DarkOrangeBrush}"/>
-                                        </Trigger>
-                                        <DataTrigger Binding="{Binding IsProductChanged}" Value="False">
-                                            <Setter Property="IsEnabled" Value="False"/>
-                                            <Setter Property="Opacity" Value="0.6"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding SelectedProduct}" Value="{x:Null}">
-                                            <Setter Property="IsEnabled" Value="False"/>
-                                            <Setter Property="Opacity" Value="0.6"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
-                        </Button>
-
-                        <!-- Статус сохранения -->
-                        <TextBlock Text="{Binding SaveStatus}" 
-                       FontSize="12"
-                       HorizontalAlignment="Center"
-                       Margin="0,5,0,0"
-                       Foreground="{Binding SaveStatusColor}"/>
+                        <Button Content="Сохранить изменения" Command="{Binding SaveProductCommand}" Background="#FF9800" Foreground="White" FontWeight="SemiBold" HorizontalAlignment="Stretch" Margin="0,10,0,0" Height="35" FontSize="14" BorderThickness="0" Cursor="Hand"/>
+                        <TextBlock Text="{Binding SaveStatus}" FontSize="12" HorizontalAlignment="Center" Margin="0,5,0,0" Foreground="{Binding SaveStatusColor}"/>
                     </StackPanel>
                 </ScrollViewer>
             </Border>
