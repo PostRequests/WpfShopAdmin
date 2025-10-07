@@ -9,8 +9,8 @@ namespace WpfShop.ViewModels
     public class AuthViewModel : INotifyPropertyChanged
     {
         private readonly AuthService _authService;
-        private string _phone = "+7";
-        private string _password = "";
+        private string _phone = "+79069746951";
+        private string _password = "0000";
         private string _statusMessage = "";
         private Brush _statusColor = Brushes.Gray;
 
