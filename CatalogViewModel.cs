@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace WpfShop.ViewModels
 {
@@ -119,28 +120,46 @@ namespace WpfShop.ViewModels
         }
 
         // Свойства для работы с изображениями
-        public string CurrentProductImage
+        public ImageSource CurrentProductImage
         {
             get
             {
                 if (_currentProductImages == null || _currentProductImages.Count == 0)
-                    return null;
+                    return GetDefaultImageSource();
 
                 if (_currentImageIndex >= 0 && _currentImageIndex < _currentProductImages.Count)
                 {
                     var imagePath = _currentProductImages[_currentImageIndex];
                     if (!string.IsNullOrEmpty(imagePath))
                     {
-                        // Преобразуем относительный путь в абсолютный
                         var fullPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data", "images", imagePath);
                         if (System.IO.File.Exists(fullPath))
                         {
-                            return fullPath;
+                            try
+                            {
+                                var bitmap = new BitmapImage();
+                                bitmap.BeginInit();
+                                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                                bitmap.UriSource = new Uri(fullPath, UriKind.Absolute);
+                                bitmap.EndInit();
+                                return bitmap;
+                            }
+                            catch
+                            {
+                                return GetDefaultImageSource();
+                            }
                         }
                     }
                 }
-                return null;
+                return GetDefaultImageSource();
             }
+        }
+        private ImageSource GetDefaultImageSource()
+        {
+            
+            var bitmap = new BitmapImage();
+           
+            return bitmap;
         }
 
         public bool HasProductImages => _currentProductImages?.Count > 0;

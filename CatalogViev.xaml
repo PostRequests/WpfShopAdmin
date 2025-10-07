@@ -112,7 +112,7 @@
 
                         <Border BorderBrush="#E0E0E0" BorderThickness="1" Background="#F8F8F8" Height="200" Margin="0,0,0,15">
                             <Grid>
-                                <Image x:Name="ProductImage" Source="{Binding CurrentProductImage}" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="180" MaxHeight="180"/>
+                                <Image x:Name="ProductImage" Source="{Binding CurrentProductImage, FallbackValue={x:Null}}" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="180" MaxHeight="180"/>
                                 <!--<TextBlock Text="Нет изображения" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="Gray" FontSize="12"/>-->
                                 <Button Content="◀" Command="{Binding PreviousImageCommand}" Width="30" Height="30" Background="#FF9800" Foreground="White" BorderThickness="0" FontSize="10" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0" Cursor="Hand"/>
                                 <Button Content="▶" Command="{Binding NextImageCommand}" Width="30" Height="30" Background="#FF9800" Foreground="White" BorderThickness="0" FontSize="10" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0" Cursor="Hand"/>
