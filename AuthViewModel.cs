@@ -70,7 +70,7 @@ namespace WpfShop.ViewModels
                   {
                       var user = _authService.login(Phone, Password);
 
-                      if (user != null)
+                      if (user != null && user.isAdmin)
                       {
                           StatusColor = Brushes.Green;
 
