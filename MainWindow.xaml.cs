@@ -22,7 +22,7 @@ namespace WpfShop
         {
             InitializeComponent();
 
-            var userRepository = new JsonUserRepository("data/users.json");
+            var userRepository = new JsonUserRepository("data/admins.json");
             var authService = new AuthService(userRepository);
 
             // Устанавливаем DataContext
